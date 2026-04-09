@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusBridge CRM — Premium College Admissions Management</title>
+  
+  <!-- GOOGLE FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- MAIN STYLES -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="toast-container" class="toast-container"></div>
+  <div id="global-loader" class="global-loader">
+    <div class="spinner-wrap">
+      <div class="spinner-outer"></div>
+      <div class="spinner-inner"></div>
+    </div>
+  </div>
+
+  <!-- AUTH: LOGIN OVERLAY -->
+  <div id="login-overlay" class="login-overlay" style="display:flex;">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-mark" style="width:50px; height:50px; font-size:1.5rem;">CB</div>
+        <h2 class="login-title">CampusBridge Portal</h2>
+        <p class="login-subtitle">Admissions Management CRM</p>
+      </div>
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group" style="margin-bottom:15px;">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="admin@campusbridge.com" required>
+        </div>
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-primary w-full" id="login-btn" style="justify-content:center; padding:14px;">Sign In to Dashboard</button>
+      </form>
+      <div class="login-footer">
+        <p>© 2026 CampusBridge Admissions. All Rights Reserved.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell" style="display:none;" id="main-app">
+    
+    <!-- =============================
+         SIDEBAR NAVIGATION
+         ============================= -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark">CB</div>
+        <div class="logo-text">
+          <span class="brand">CampusBridge</span>
+          <span class="tagline">Admissions Ops CRM</span>
+        </div>
+        <button class="mobile-close-btn" style="display:none; margin-left: auto; background:none; border:none; color:var(--text-main);" onclick="document.getElementById('sidebar').classList.remove('active')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        
+        <div class="nav-item active" onclick="showPage('dashboard', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="nav-label">Dashboard</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('leads', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-label">Leads</span>
+          <span class="nav-badge">48</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('students', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <span class="nav-label">Students</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('applications', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="nav-label">Applications</span>
+          <span class="nav-badge">12</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('colleges', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="nav-label">Colleges</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('courses', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-label">Courses</span>
+        </div>
+
+        <div class="sidebar-section">Admissions Operations</div>
+
+        <div class="nav-item" onclick="showPage('admissions', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span class="nav-label">Admissions Board</span>
+          <span class="nav-badge">7</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('documents', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          <span class="nav-label">Documents</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('kanban', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span class="nav-label">Kanban Board</span>
+        </div>
+
+        <div class="sidebar-section">Finance & Admin</div>
+
+        <div class="nav-item" onclick="showPage('payments', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span class="nav-label">Payments</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('invoices', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="nav-label">Invoices</span>
+          <span class="nav-badge" style="background:var(--danger); color:#fff;">3</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('reports', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span class="nav-label">Reports</span>
+        </div>
+
+        <div class="nav-item" id="nav-users" onclick="showPage('users', this)" style="display:none;">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-label">User Management</span>
+        </div>
+
+        <div class="nav-item" onclick="showPage('settings', this)">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-label">Settings</span>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-avatar" id="sidebar-avatar-initials">CB</div>
+        <div class="sidebar-user">
+          <span class="user-name" id="sidebar-user-name">Loading...</span>
+          <span class="user-role" id="sidebar-user-role">...</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <!-- =============================
+         MAIN CONTENT AREA
+         ============================= -->
+    <main class="main-area" id="mainArea">
+      
+      <!-- HEADER -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" style="display:none;" onclick="document.getElementById('sidebar').classList.add('active')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="header-title">CampusBridge <span>CRM</span></div>
+          <div class="header-search">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="global-search" placeholder="Search students, leads, applications...">
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button class="action-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="badge-dot"></span>
+          </button>
+          
+          <div class="header-profile" onclick="showPage('profile', null)">
+            <div class="profile-img" id="header-avatar-initials">CB</div>
+            <span class="profile-info" id="header-user-name">Loading...</span>
+          </div>
+          
+          <button class="btn-primary" onclick="openModal()">
+            <span style="font-size: 1.2rem; line-height: 1;">+</span> New Lead
+          </button>
+        </div>
+      </header>
+
+      <!-- DASHBOARD PAGE -->
+      <section id="dashboard" class="page-content active">
+        <!-- KPI Row -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-navy" data-kpi="totalLeads">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">Total Leads</div>
+          </div>
+          
+          <div class="kpi-card kpi-indigo" data-kpi="todayLeads">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">Today Leads</div>
+          </div>
+
+          <div class="kpi-card kpi-emerald" data-kpi="confirmedAdmissions">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">Admission Confirmed</div>
+          </div>
+
+          <div class="kpi-card kpi-rose" data-kpi="notAttendedToday">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            </div>
+            <div class="kpi-value" style="color:var(--danger)">0</div>
+            <div class="kpi-label">Today Not Attended</div>
+          </div>
+
+          <div class="kpi-card kpi-navy-alt" data-kpi="newEnquiries">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">New Enquiry</div>
+          </div>
+
+          <div class="kpi-card kpi-violet" data-kpi="inCounseling">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">Counseling</div>
+          </div>
+
+          <div class="kpi-card kpi-cyan" data-kpi="interested">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">Interested</div>
+          </div>
+
+          <div class="kpi-card kpi-slate" data-kpi="notInterested">
+            <div class="kpi-icon-row">
+              <div class="kpi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">Not Interested</div>
+          </div>
+        </div>
+
+        <!-- Dashboard Content Grid -->
+        <div class="dash-layout">
+          <!-- Main Content -->
+          <div class="dash-main">
+            <!-- Funnel Section -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Application Pipeline Funnel</div>
+                  <div class="card-subtitle">Live health score across all recruitment stages</div>
+                </div>
+                <div class="badge-blue badge">Real-time Data</div>
+              </div>
+              <div class="card-body">
+                <div class="pipeline-container">
+                  <div class="pipeline-stage">
+                    <div class="stage-bar" style="background: var(--navy);">312</div>
+                    <div class="stage-name">New Inquiry</div>
+                  </div>
+                  <div class="pipeline-stage">
+                    <div class="stage-bar" style="background: var(--primary);">218</div>
+                    <div class="stage-name">Counseling</div>
+                  </div>
+                  <div class="pipeline-stage">
+                    <div class="stage-bar" style="background: var(--secondary);">164</div>
+                    <div class="stage-name">Interested</div>
+                  </div>
+                  <div class="pipeline-stage">
+                    <div class="stage-bar" style="background: var(--info);">112</div>
+                    <div class="stage-name">Docs Pending</div>
+                  </div>
+                  <div class="pipeline-stage">
+                    <div class="stage-bar" style="background: var(--accent);">88</div>
+                    <div class="stage-name">Applied</div>
+                  </div>
+                  <div class="pipeline-stage">
+                    <div class="stage-bar" style="background: var(--success);">62</div>
+                    <div class="stage-name">Admission Confirmed</div>
+                  </div>
+                  <div class="pipeline-stage">
+                    <div class="stage-bar" style="background: var(--success);">142</div>
+                    <div class="stage-name">Enrolled</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Leads Table -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Recent Inquiries</div>
+                  <div class="card-subtitle">Latest student engagement from across all branches</div>
+                </div>
+                <button class="badge-gold badge" onclick="showPage('leads', null)">View All Leads</button>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Counsellor</th>
+                      <th>Pref. State</th>
+                      <th>Interested Course</th>
+                      <th>Status</th>
+                      <th>Priority</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-leads-body">
+                    <!-- Data will be populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar Content -->
+          <div class="dash-side">
+            <!-- Reminders Card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Reminders</span></div>
+              <div class="card-body" id="dash-reminders">
+                <!-- Data by JS -->
+              </div>
+            </div>
+
+            <!-- Performance Card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Agent Performance</span></div>
+              <div class="card-body" id="dash-counselors">
+                <!-- Data by JS -->
+              </div>
+            </div>
+
+            <!-- Activity Card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Recent Activity</span></div>
+              <div class="card-body" id="dash-activity-list">
+                <!-- Data by JS -->
+              </div>
+            </div>
+
+            <!-- Lead Sources (Dashboard Version) -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Lead Sources</span></div>
+              <div class="card-body" id="dash-sources">
+                <!-- Data by JS -->
+              </div>
+            </div>
+
+            <!-- State Split -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Top States (Preference)</span></div>
+              <div class="card-body" id="dash-countries">
+                <!-- Data by JS -->
+              </div>
+            </div>
+
+            <!-- Dashboard Quick Actions -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Quick Actions</span></div>
+              <div class="card-body">
+                <div class="quick-action-grid">
+                  <div class="qa-card" onclick="openModal('leadModal')">
+                    <span class="qa-icon">👤</span>
+                    <span class="qa-label">New Lead</span>
+                  </div>
+                  <div class="qa-card" onclick="openModal('invoiceModal')">
+                    <span class="qa-icon">📄</span>
+                    <span class="qa-label">Create Invoice</span>
+                  </div>
+                  <div class="qa-card" onclick="showPage('colleges')">
+                    <span class="qa-icon">🏫</span>
+                    <span class="qa-label">Add College</span>
+                  </div>
+                  <div class="qa-card" onclick="openModal('paymentModal')">
+                    <span class="qa-icon">💰</span>
+                    <span class="qa-label">Log Payment</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEADS PAGE -->
+      <section id="leads" class="page-content">
+        <div class="flex-between">
+          <div>
+            <h2 class="card-title" style="font-size: 1.5rem;">Lead Management</h2>
+            <p class="text-muted">Nurture and convert student inquiries across Kerala</p>
+          </div>
+          <div class="flex-center gap-12">
+            <div class="tab-filters">
+              <button class="active">All</button>
+              <button>New</button>
+              <button>Qualified</button>
+              <button>Applied</button>
+            </div>
+            <div class="view-toggles" style="display: flex; background: var(--bg-soft); padding: 4px; border-radius: var(--radius-md); gap: 4px;">
+              <button class="view-btn active" title="Table View" onclick="toggleLeadView('table')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg></button>
+              <button class="view-btn" title="Grid View" onclick="toggleLeadView('grid')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+            </div>
+            <button class="btn-primary" onclick="openModal()">+ Add Lead</button>
+          </div>
+        </div>
+        
+        <div class="kpi-grid mb-10" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="kpi-card kpi-navy"><div class="kpi-label">Total Leads</div><div class="kpi-value">1,284</div></div>
+          <div class="kpi-card kpi-indigo"><div class="kpi-label">Active This Week</div><div class="kpi-value">156</div></div>
+          <div class="kpi-card kpi-cyan"><div class="kpi-label">Qualified</div><div class="kpi-value">312</div></div>
+          <div class="kpi-card kpi-emerald"><div class="kpi-label">Conversions</div><div class="kpi-value">62</div></div>
+        </div>
+
+        <div class="toolbar mb-10">
+          <div class="search-mini">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="leads-search" placeholder="Search leads by name, phone, district...">
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">State:</span>
+            <select class="filter-select" id="filter-state"></select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">District:</span>
+            <select class="filter-select" id="filter-district"><option value="">All Districts</option></select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select" id="filter-status"></select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Source:</span>
+            <select class="filter-select" id="filter-source"></select>
+          </div>
+        </div>
+        
+        <div id="leads-table-view" class="card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student Details</th>
+                  <th>Contact info</th>
+                  <th>Location</th>
+                  <th>Course & College</th>
+                  <th>Source & Counselor</th>
+                  <th>Call Tracking</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="all-leads-body">
+                <!-- Data will be populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="leads-grid-view" style="display: none;">
+          <div id="all-leads-grid" class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+            <!-- Grid cards populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- STUDENTS PAGE -->
+      <section id="students" class="page-content">
+        <div class="flex-between">
+          <div>
+            <h2 class="card-title" style="font-size: 1.5rem;">Registered Students</h2>
+            <p class="text-muted">Manage currently enrolled and active student profiles</p>
+          </div>
+          <div class="toolbar">
+             <div class="search-mini"><input type="text" placeholder="Search students..."></div>
+             <button class="btn-primary" onclick="openModal('enrollModal')">+ New Student</button>
+          </div>
+        </div>
+        <div id="students-grid" class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+          <!-- Cards will be populated by JS -->
+        </div>
+      </section>
+
+      <!-- ADMISSIONS BOARD (REPLACED VISA) -->
+      <section id="admissions" class="page-content">
+        <div class="flex-between">
+          <div>
+            <h2 class="card-title" style="font-size: 1.5rem;">Admissions Tracking Board</h2>
+            <p class="text-muted">Real-time application status across partner colleges</p>
+          </div>
+          <div class="flex-center gap-12">
+             <button class="btn-primary">Daily Report</button>
+          </div>
+        </div>
+        <div id="admissions-grid" class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+          <!-- Cards will be populated by JS -->
+        </div>
+      </section>
+
+      <!-- COLLEGES PAGE -->
+      <section id="colleges" class="page-content">
+        <h2 class="card-title" style="font-size: 1.5rem;">Partner Colleges</h2>
+        <div id="colleges-grid" class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+          <!-- Cards will be populated by JS -->
+        </div>
+      </section>
+
+      <!-- COURSES PAGE -->
+      <section id="courses" class="page-content">
+        <h2 class="card-title" style="font-size: 1.5rem;">Available Courses</h2>
+        <div id="courses-grid" class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+          <!-- Cards will be populated by JS -->
+        </div>
+      </section>
+
+      <!-- KANBAN PAGE -->
+      <section id="kanban" class="page-content">
+        <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 20px;">Application Pipeline Board</h2>
+        <div class="kanban-board" id="kanbanBoard">
+          <!-- Columns will be populated by JS -->
+        </div>
+      </section>
+
+      <!-- PROFILE PAGE (Detailed) -->
+      <section id="profile" class="page-content">
+        <div class="profile-hero">
+          <div class="profile-avatar-lg" id="profile-avatar">AK</div>
+          <div class="profile-main-info">
+            <div class="profile-name-row">
+              <h2 class="profile-name" id="profile-name">Arjun Krishnan</h2>
+              <span class="profile-id" id="profile-id">ID: CB-1284 / ADM-2026</span>
+            </div>
+            <div class="profile-tags" id="profile-tags">
+              <span class="badge badge-blue">B.Tech CS</span>
+              <span class="badge badge-gold">Top Priority</span>
+              <span class="badge badge-teal">CUSAT Kochi</span>
+            </div>
+            <div class="profile-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Mobile Number</span>
+                <span class="meta-value" id="profile-phone">+91 98765 43210</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Parent Name</span>
+                <span class="meta-value" id="profile-parent">Krishnan Nair</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">District</span>
+                <span class="meta-value" id="profile-district">Ernakulam</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Current Stage</span>
+                <span class="meta-value text-success" id="profile-status" style="font-weight: 700;">Offer Received</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex-column gap-12" style="display:flex; flex-direction:column;">
+             <button class="btn-primary" onclick="openModal('invoiceModal')">Create Invoice</button>
+             <button class="badge badge-gold" style="padding:10px 15px; text-align:center;">Log Payment</button>
+          </div>
+        </div>
+        
+        <div class="profile-section-tab">
+           <div class="tab active">Overview</div>
+           <div class="tab">Documents</div>
+           <div class="tab">Finances</div>
+           <div class="tab">Activity Log</div>
+        </div>
+
+        <div class="grid-2-1" style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+           <div class="dash-main">
+              <div class="card">
+                 <div class="card-header"><span class="card-title">Admission Details</span></div>
+                 <div class="card-body">
+                    <div class="report-grid">
+                       <div class="stat-row"><span class="stat-name">Preferred College</span> <span class="stat-val">CUSAT, Kochi</span></div>
+                       <div class="stat-row"><span class="stat-name">Course Applied</span> <span class="stat-val">B.Tech Computer Science</span></div>
+                       <div class="stat-row"><span class="stat-name">Batch / Intake</span> <span class="stat-val">2026 - 2030</span></div>
+                       <div class="stat-row"><span class="stat-name">Assigned Counselor</span> <span class="stat-val">Sreekanth M.</span></div>
+                    </div>
+                 </div>
+              </div>
+
+              <div class="card">
+                 <div class="card-header"><span class="card-title">Education Background</span></div>
+                 <div class="card-body">
+                    <div class="report-grid">
+                       <div class="stat-row"><span class="stat-name">Plus Two Marks</span> <span class="stat-val">94.5% (PCM)</span></div>
+                       <div class="stat-row"><span class="stat-name">Entrance Score</span> <span class="stat-val">Rank: 2450 (KEAM)</span></div>
+                       <div class="stat-row"><span class="stat-name">School</span> <span class="stat-val">Bhavans Vidya Mandir</span></div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           <div class="dash-side">
+              <div class="card">
+                 <div class="card-header"><span class="card-title">Document Progress</span></div>
+                 <div class="card-body" id="profile-docs-summary">
+                    <!-- Data by JS -->
+                 </div>
+              </div>
+              
+              <div class="card">
+                 <div class="card-header"><span class="card-title">Fee Summary</span></div>
+                 <div class="card-body">
+                    <div class="stat-row"><span class="stat-name">Total Fees</span> <span class="stat-val">₹1,20,000</span></div>
+                    <div class="stat-row"><span class="stat-name">Paid</span> <span class="stat-val text-success">₹45,000</span></div>
+                    <div class="stat-row"><span class="stat-name">Balance</span> <span class="stat-val text-danger">₹75,000</span></div>
+                    <button class="btn-primary w-full mt-15" style="font-size:0.7rem;">Manage Invoices</button>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      <!-- APPLICATIONS PAGE -->
+      <section id="applications" class="page-content">
+        <div class="flex-between">
+          <div>
+            <h2 class="card-title" style="font-size: 1.5rem;">Application Tracking</h2>
+            <p class="text-muted">Monitor admission progress with partner universities</p>
+          </div>
+          <div class="flex-center gap-12">
+            <div class="tab-filters">
+              <button class="active">All</button>
+              <button>Submitted</button>
+              <button>Offer Recv.</button>
+              <button>Enrolled</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="kpi-grid mb-10" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="kpi-card kpi-navy"><div class="kpi-label">Submitted</div><div class="kpi-value">186</div></div>
+          <div class="kpi-card kpi-indigo"><div class="kpi-label">Under Review</div><div class="kpi-value">42</div></div>
+          <div class="kpi-card kpi-cyan"><div class="kpi-label">Offers Received</div><div class="kpi-value">62</div></div>
+          <div class="kpi-card kpi-rose"><div class="kpi-label">Rejections</div><div class="kpi-value">12</div></div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>App ID</th>
+                  <th>Student</th>
+                  <th>College / University</th>
+                  <th>Course / Program</th>
+                  <th>Submission</th>
+                  <th>Progress</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="applications-body">
+                <!-- Data will be populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOCUMENTS PAGE -->
+      <section id="documents" class="page-content">
+        <h2 class="card-title" style="font-size: 1.5rem;">Document Control Center</h2>
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Pending Verifications</span></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Student</th><th>Doc Type</th><th>Status</th><th>Urgency</th></tr></thead>
+                <tbody id="docs-pending-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Storage Summary</span></div>
+            <div class="card-body">
+              <div class="form-group" style="gap: 15px;">
+                <div class="flex-between"><span>Total Documents</span> <span>4,284</span></div>
+                <div class="flex-between"><span>Storage Used</span> <span>2.4 GB / 10 GB</span></div>
+                <div style="height: 8px; background: var(--bg-alt); border-radius: 10px; overflow: hidden;"><div style="width: 24%; height: 100%; background: var(--teal);"></div></div>
+                <div class="flex-between"><span>Audit Status</span> <span class="badge-green badge">Compliant</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INVOICES PAGE -->
+      <section id="invoices" class="page-content">
+        <div class="flex-between">
+          <div>
+            <h2 class="card-title" style="font-size: 1.5rem;">Student Invoices</h2>
+            <p class="text-muted">Manage fee structures, discounts, and collections</p>
+          </div>
+          <div class="flex-center gap-12">
+            <button class="btn-primary" onclick="openModal('invoiceModal')">+ Create Invoice</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-navy"><div class="kpi-label">Total Billed</div><div class="kpi-value" id="inv-total-billed">₹48.2L</div></div>
+          <div class="kpi-card kpi-emerald"><div class="kpi-label">Total Collected</div><div class="kpi-value" id="inv-total-collected">₹28.6L</div></div>
+          <div class="kpi-card kpi-rose"><div class="kpi-label">Pending Dues</div><div class="kpi-value" id="inv-total-due">₹19.6L</div></div>
+          <div class="kpi-card kpi-amber"><div class="kpi-label">Overdue</div><div class="kpi-value" id="inv-total-overdue">₹4.2L</div></div>
+        </div>
+
+        <div class="toolbar">
+           <div class="search-mini">
+              <input type="text" placeholder="Search by student name or invoice #">
+           </div>
+           <div class="filter-group">
+              <span class="filter-label">Status:</span>
+              <select class="filter-select"><option>All</option><option>Paid</option><option>Partially Paid</option><option>Overdue</option><option>Draft</option></select>
+           </div>
+           <button class="badge badge-gold">Export PDF</button>
+        </div>
+
+        <div id="invoices-grid" class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- PAYMENTS PAGE -->
+      <section id="payments" class="page-content">
+        <h2 class="card-title" style="font-size: 1.5rem;">Accounts & Invoices</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-navy"><div class="kpi-label">Outstanding Invoices</div><div class="kpi-value">₹12.4L</div><span class="badge badge-red">Needs Attention</span></div>
+          <div class="kpi-card kpi-green"><div class="kpi-label">Collected This Month</div><div class="kpi-value">₹28.6L</div><span class="badge badge-green">↑ 12%</span></div>
+          <div class="kpi-card kpi-gold"><div class="kpi-label">Pending Refund Requests</div><div class="kpi-value">4</div><span class="badge badge-amber">Processing</span></div>
+          <div class="kpi-card kpi-blue"><div class="kpi-label">Total Transactions</div><div class="kpi-value">842</div><span class="badge badge-blue">YTD</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Recent Transactions</span></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Trx ID</th><th>Student</th><th>Category</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+              <tbody id="payments-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS PAGE -->
+      <section id="reports" class="page-content">
+        <div class="flex-between">
+           <div>
+              <h2 class="card-title" style="font-size: 1.5rem;">Admission Intelligence</h2>
+              <p class="text-muted">Real-time performance analytics across all branches</p>
+           </div>
+           <div class="toolbar"><button class="btn-primary">Generate Quarterly Summary</button></div>
+        </div>
+
+        <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+           <div class="kpi-card kpi-navy"><div class="kpi-label">Global Conv. Rate</div><div class="kpi-value">12.4%</div><span class="badge-green badge">↑ 2.1%</span></div>
+           <div class="kpi-card kpi-indigo"><div class="kpi-label">Avg. Lead Time</div><div class="kpi-value">18 Days</div><span class="badge-blue badge">Optimized</span></div>
+           <div class="kpi-card kpi-cyan"><div class="kpi-label">Top Branch</div><div class="kpi-value">Kochi</div><span class="badge-gold badge">Primary</span></div>
+           <div class="kpi-card kpi-emerald"><div class="kpi-label">Total Revenue</div><div class="kpi-value">₹84.2L</div><span class="badge-green badge">88% of Target</span></div>
+        </div>
+
+        <div class="report-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Leads by Source</span></div>
+            <div class="card-body" id="source-report">
+                <!-- Data by JS -->
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">State Performance</span></div>
+            <div class="card-body" id="country-report">
+                <!-- Data by JS -->
+            </div>
+          </div>
+          <div class="card">
+             <div class="card-header"><span class="card-title">Counselor Leaderboard</span></div>
+             <div class="card-body" id="counselor-leaderboard">
+                 <!-- Data by JS -->
+             </div>
+          </div>
+          <div class="card">
+             <div class="card-header"><span class="card-title">Trending Courses</span></div>
+             <div class="card-body" id="course-trends">
+                 <!-- Data by JS -->
+             </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">Monthly Admission Trend</span></div>
+          <div class="card-body" style="height: 250px; display: flex; align-items: flex-end; gap: 15px; padding-bottom: 50px; padding-top:20px;">
+            <div style="flex: 1; height: 40%; background: var(--navy); border-radius: 4px; position: relative; transition: height 0.5s;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">JAN</span></div>
+            <div style="flex: 1; height: 55%; background: var(--teal); border-radius: 4px; position: relative;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">FEB</span></div>
+            <div style="flex: 1; height: 48%; background: var(--navy); border-radius: 4px; position: relative;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">MAR</span></div>
+            <div style="flex: 1; height: 82%; background: var(--gold); border-radius: 4px; position: relative;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">APR</span></div>
+            <div style="flex: 1; height: 60%; background: var(--navy); border-radius: 4px; position: relative;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">MAY</span></div>
+            <div style="flex: 1; height: 85%; background: var(--success); border-radius: 4px; position: relative;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">JUN</span></div>
+            <div style="flex: 1; height: 75%; background: var(--navy); border-radius: 4px; position: relative;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">JUL</span></div>
+            <div style="flex: 1; height: 92%; background: var(--primary); border-radius: 4px; position: relative;"><span style="position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 0.7rem; font-weight:600;">AUG</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS PAGE -->
+      <section id="settings" class="page-content">
+        <h2 class="card-title" style="font-size: 1.5rem;">System Configuration</h2>
+        
+        <div class="profile-section-tab">
+           <div class="tab active">General</div>
+           <div class="tab">Branch & Users</div>
+           <div class="tab">Automation</div>
+           <div class="tab">Templates</div>
+           <div class="tab">Billing Setup</div>
+        </div>
+
+        <div class="grid-2-1" style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+           <div class="dash-main">
+              <div class="card">
+                <div class="card-header"><span class="card-title">Organization Profile</span></div>
+                <div class="card-body">
+                  <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" value="Rahul Sharma"></div>
+                    <div class="form-group"><label class="form-label">Internal ID</label><input type="text" class="form-input" value="CB-OFF-01" disabled></div>
+                    <div class="form-group full"><label class="form-label">Office Address</label><input type="text" class="form-input" value="3rd Floor, Silicon Towers, Kochi, Kerala"></div>
+                  </div>
+                  <button class="btn-primary mt-20">Save Changes</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header"><span class="card-title">Admission Parameters</span></div>
+                <div class="card-body">
+                   <div class="form-group" style="gap: 15px;">
+                      <div class="flex-between">
+                         <div>
+                            <div class="font-600 text-sm">Auto-Assign Leads</div>
+                            <div class="text-xs text-muted">Distribute new inquiries among active counselors</div>
+                         </div>
+                         <input type="checkbox" checked>
+                      </div>
+                      <div class="flex-between">
+                         <div>
+                            <div class="font-600 text-sm">WhatsApp Notifications</div>
+                            <div class="text-xs text-muted">Send automated alerts to students on stage change</div>
+                         </div>
+                         <input type="checkbox" checked>
+                      </div>
+                      <div class="flex-between">
+                         <div>
+                            <div class="font-600 text-sm">Invoice Prefixes</div>
+                            <div class="text-xs text-muted">Customize how invoice numbers are generated</div>
+                         </div>
+                         <button class="badge badge-blue">Configure</button>
+                      </div>
+                   </div>
+                </div>
+              </div>
+           </div>
+
+           <div class="dash-side">
+              <div class="card">
+                 <div class="card-header"><span class="card-title">Active Counselors</span></div>
+                 <div class="card-body" id="settings-counselors-list">
+                    <!-- Data by JS -->
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      <!-- USER MANAGEMENT PAGE -->
+      <section id="users" class="page-content">
+        <div class="page-header">
+          <div class="header-info">
+            <h2 class="page-title">User Management</h2>
+            <p class="page-subtitle">Manage system users, roles, and permissions</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openUserModal()">
+              <span>+</span> Add New User
+            </button>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 25px;">
+           <div class="kpi-card kpi-navy">
+              <div class="kpi-value" id="total-users-count">0</div>
+              <div class="kpi-label">Total Staff Members</div>
+           </div>
+           <div class="kpi-card kpi-indigo">
+              <div class="kpi-value" id="active-users-count">0</div>
+              <div class="kpi-label">Active Users</div>
+           </div>
+           <div class="kpi-card kpi-pink">
+              <div class="kpi-value" id="suspended-users-count">0</div>
+              <div class="kpi-label">Suspended Accounts</div>
+           </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3 class="table-title">System Users</h3>
+            <div class="table-actions">
+               <div class="header-search" style="margin-right: 15px;">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" id="user-search" placeholder="Search by name, email..." onkeyup="filterUsersTable()">
+               </div>
+               <select class="form-select" style="max-width: 150px; padding: 8px;" id="user-role-filter" onchange="filterUsersTable()">
+                  <option value="">All Roles</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="ACCOUNTANT">Accountant</option>
+                  <option value="SALES">Sales</option>
+               </select>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="data-table" id="users-table">
+              <thead>
+                <tr>
+                  <th>User Info</th>
+                  <th>Role</th>
+                  <th>Branch / Dept</th>
+                  <th>Status</th>
+                  <th>Last Login</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <!-- Dynamic Rows via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =============================
+       MODALS
+       ============================= -->
+       
+  <!-- MODAL: NEW LEAD -->
+  <div class="modal-overlay" id="leadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Create New Lead Enquiry</h3>
+        <button class="modal-close" onclick="closeModal('leadModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Student Name *</label><input type="text" id="lead-name" class="form-input" placeholder="Full name"></div>
+          <div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" id="lead-phone" class="form-input" placeholder="+91 ..."></div>
+          <div class="form-group"><label class="form-label">WhatsApp Number</label><input type="tel" id="lead-whatsapp" class="form-input" placeholder="WhatsApp no."></div>
+          <div class="form-group"><label class="form-label">Email Address</label><input type="email" id="lead-email" class="form-input" placeholder="email@example.com"></div>
+          <div class="form-group"><label class="form-label">DOB</label><input type="date" id="lead-dob" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Area / Landmark</label><input type="text" id="lead-area" class="form-input" placeholder="e.g. MG Road, Near Civil Station"></div>
+          <div class="form-group"><label class="form-label">District</label><select id="lead-district" class="form-select"><option>Ernakulam</option><option>Kozhikode</option><option>Thrissur</option><option>Malappuram</option><option>Kollam</option><option>Kottayam</option><option>Palakkad</option><option>Kannur</option><option>Alappuzha</option><option>Trivandrum</option></select></div>
+          <div class="form-group"><label class="form-label">State</label><select id="lead-state" class="form-select"><option>Kerala</option><option>Tamil Nadu</option><option>Karnataka</option></select></div>
+          <div class="form-group"><label class="form-label">Preferred Course</label><select id="lead-course" class="form-select"></select></div>
+          <div class="form-group"><label class="form-label">College Preference</label><select id="lead-college" class="form-select"></select></div>
+          <div class="form-group"><label class="form-label">Source</label><select id="lead-source" class="form-select"></select></div>
+          <div class="form-group"><label class="form-label">Assigned Counselor</label><select id="lead-counselor" class="form-select"></select></div>
+          <div class="form-group"><label class="form-label">Lead Status</label><select id="lead-status" class="form-select"></select></div>
+          <div class="form-group"><label class="form-label">Last Call Date</label><input type="date" id="lead-last-call" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Next Call Date</label><input type="date" id="lead-next-call" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Call Attempts</label><input type="number" id="lead-attempts" class="form-input" value="0"></div>
+          <div class="form-group full"><label class="form-label">Internal Follow-up Notes</label><textarea id="lead-notes" class="form-textarea" placeholder="Enter follow-up details..."></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="badge badge-red" style="padding:10px 20px;" onclick="closeModal('leadModal')">Discard</button>
+        <button class="btn-primary" id="btn-create-lead" onclick="createNewLead()">Create Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE INVOICE -->
+  <div class="modal-overlay" id="invoiceModal">
+    <div class="modal" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Service Invoice</h3>
+        <button class="modal-close" onclick="closeModal('invoiceModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Select Student</label><select class="form-select" id="inv-student-select"></select></div>
+          <div class="form-group"><label class="form-label">Invoice Category</label><select class="form-select"><option>Registration Fee</option><option>Admission Fee</option><option>Hostel Advance</option><option>Documentation</option></select></div>
+          <div class="form-group"><label class="form-label">College / University</label><select class="form-select" id="inv-college-select"></select></div>
+          <div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-input"></div>
+          
+          <div class="form-group full" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 15px;">
+             <div class="flex-between mb-10"><span class="font-600 text-sm">Line Items</span> <button class="badge badge-blue">+ Add Item</button></div>
+             <table class="data-table" style="background:var(--bg-soft); border-radius:8px;">
+                <thead><tr><th>Description</th><th>Amount (₹)</th><th>Tax</th><th>Total (₹)</th></tr></thead>
+                <tbody>
+                   <tr><td>Admission Processing Charges</td><td><input type="number" class="form-input" value="15000" style="padding:4px 8px;"></td><td>0%</td><td>15,000</td></tr>
+                   <tr><td>Registration & Documentation</td><td><input type="number" class="form-input" value="5000" style="padding:4px 8px;"></td><td>0%</td><td>5,000</td></tr>
+                </tbody>
+             </table>
+          </div>
+
+          <div class="form-group full" style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; margin-top:15px;">
+             <div class="text-sm">Subtotal: <strong>₹20,000</strong></div>
+             <div class="text-lg" style="font-size:1.4rem; font-weight:700; color:var(--navy); margin-top:10px;">Total Due: ₹20,00,000</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="badge badge-red" style="padding: 10px 20px;" onclick="closeModal('invoiceModal')">Cancel</button>
+        <button class="btn-primary" onclick="closeModal('invoiceModal')">Generate Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LOG PAYMENT -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Log Student Payment</h3>
+        <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+         <div class="form-grid">
+            <div class="form-group full"><label class="form-label">Select Invoice / Student</label><select class="form-select" id="pay-invoice-select"></select></div>
+            <div class="form-group"><label class="form-label">Amount Paid (₹)</label><input type="number" class="form-input" placeholder="0.00"></div>
+            <div class="form-group"><label class="form-label">Payment Mode</label><select class="form-select"><option>UPI (GPay/PhonePe)</option><option>Bank Transfer</option><option>Cash</option><option>Cheque</option></select></div>
+            <div class="form-group full"><label class="form-label">Reference ID (UTR)</label><input type="text" class="form-input" placeholder="Enter transaction ref..."></div>
+         </div>
+      </div>
+      <div class="modal-footer">
+         <button class="badge badge-red" style="padding:10px 20px;" onclick="closeModal('paymentModal')">Cancel</button>
+         <button class="btn-primary" onclick="closeModal('paymentModal')">Submit Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD FOLLOW-UP -->
+  <div class="modal-overlay" id="followupModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Schedule Follow-up</h3>
+        <button class="modal-close" onclick="closeModal('followupModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+           <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input"></div>
+           <div class="form-group"><label class="form-label">Time</label><input type="time" class="form-input"></div>
+           <div class="form-group full"><label class="form-label">Agenda</label><textarea class="form-textarea" placeholder="Discuss fee structure..."></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="badge badge-red" style="padding:10px 20px;" onclick="closeModal('followupModal')">Discard</button>
+        <button class="btn-primary" onclick="closeModal('followupModal')">Save Reminder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: UPDATE STATUS -->
+  <div class="modal-overlay" id="statusUpdateModal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Update Lead Status</h3>
+        <button class="modal-close" onclick="closeModal('statusUpdateModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+         <input type="hidden" id="status-update-id">
+         <div class="form-group full">
+            <label class="form-label">Current Lead: <strong id="status-update-name">Student Name</strong></label>
+            <select class="form-select" id="status-update-select"></select>
+         </div>
+         <div class="form-group full mt-15">
+            <label class="form-label">Update Note</label>
+            <textarea class="form-textarea" id="status-update-note" placeholder="Reason for status change..."></textarea>
+         </div>
+      </div>
+      <div class="modal-footer">
+         <button class="badge badge-red" style="padding:10px 20px;" onclick="closeModal('statusUpdateModal')">Cancel</button>
+         <button class="btn-primary" onclick="updateLeadStatus()">Update Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD/EDIT USER -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="user-modal-title">Add New System User</h3>
+        <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="user-form">
+          <input type="hidden" id="edit-user-id">
+          <div class="form-grid">
+            <div class="form-group full">
+              <label class="form-label">Full Name *</label>
+              <input type="text" id="user-fullname" class="form-input" placeholder="e.g. John Doe" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <input type="email" id="user-email" class="form-input" placeholder="user@campusbridge.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" id="user-phone" class="form-input" placeholder="+91 ...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="user-username" class="form-input" placeholder="johndoe123">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Employee Code</label>
+              <input type="text" id="user-code" class="form-input" placeholder="CB-EMP-001">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role *</label>
+              <select id="user-role" class="form-select" required>
+                <option value="SALES">Sales User</option>
+                <option value="ACCOUNTANT">Accountant</option>
+                <option value="MANAGER">Manager</option>
+                <option value="ADMIN">Administrator</option>
+                <option value="SUPER_ADMIN">Super Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Designation</label>
+              <input type="text" id="user-designation" class="form-input" placeholder="e.g. Senior Sales Executive">
+            </div>
+            <div class="form-group" id="password-group">
+              <label class="form-label">Password *</label>
+              <input type="password" id="user-password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="user-status" class="form-select">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="badge badge-red" style="padding:10px 20px;" onclick="closeModal('userModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveUser()">Save User Details</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PERMISSION MATRIX -->
+  <div class="modal-overlay" id="permissionModal">
+    <div class="modal" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Permission Matrix: <span id="perm-user-name" style="color:var(--primary);">User Name</span></h3>
+        <button class="modal-close" onclick="closeModal('permissionModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="perm-user-id">
+        <p style="margin-bottom: 20px; font-size: 0.9rem; color: #666;">Granular access control for this user. Overrides role-based defaults.</p>
+        
+        <div class="table-container" style="box-shadow: none; border: 1px solid #eee;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Module Name</th>
+                <th style="text-align:center;">View</th>
+                <th style="text-align:center;">Create</th>
+                <th style="text-align:center;">Edit</th>
+                <th style="text-align:center;">Delete</th>
+                <th style="text-align:center;">Export</th>
+              </tr>
+            </thead>
+            <tbody id="permission-matrix-body">
+              <!-- Rows like Leads, Finance, Users etc -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="badge" style="padding:10px 20px;" onclick="closeModal('permissionModal')">Close</button>
+        <button class="btn-primary" onclick="savePermissions()">Update Permissions</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="script.js"></script>
+</body>
+</html>
