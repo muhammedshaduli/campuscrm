@@ -1,5 +1,5 @@
 /* =========================================
-   CAMPUSBRIDGE CRM : DESIGN SYSTEM
+   CALVIZ CAMPUSCRM : DESIGN SYSTEM
    ========================================= */
 :root {
   /* Core Brand Palette */
@@ -206,6 +206,40 @@ svg {
   animation: float3D 3s ease-in-out infinite;
 }
 
+.logo-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+  flex-shrink: 0;
+}
+
+.logo-badge img {
+  width: 176px;
+  height: 52px;
+  max-width: none;
+  object-fit: cover;
+  object-position: left center;
+  transform: translateX(2px);
+}
+
+.brand-logo {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.brand-logo-auth {
+  width: min(280px, 100%);
+  margin-bottom: 18px;
+  filter: drop-shadow(0 10px 24px rgba(37, 99, 235, 0.14));
+}
+
 .logo-text {
   display: flex;
   flex-direction: column;
@@ -230,6 +264,17 @@ svg {
 
 .collapsed .logo-text {
   opacity: 0;
+}
+
+.collapsed .logo-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.collapsed .logo-badge img {
+  width: 136px;
+  height: 40px;
 }
 
 .sidebar-nav {
@@ -1682,6 +1727,10 @@ svg {
     margin: 10px;
     max-height: 90vh;
   }
+
+  .brand-logo-auth {
+    width: min(220px, 100%);
+  }
 }
 
 @media (max-width: 480px) {
@@ -1693,4 +1742,3 @@ svg {
     display: none; /* Hide name on very small screens */
   }
 }
-

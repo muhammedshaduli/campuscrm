@@ -1,13 +1,15 @@
 /**
  * RBAC Middleware - Module-wise Permission Check
  */
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../config/db');
 
 const checkPermission = (module, action) => {
   return async (req, res, next) => {
     try {
       const user = req.user; // Set by auth middleware
+      const normalizedModule = String(module || '').toUpperCase();
+      const normalizedAction = String(action || '').toUpperCase();
+
       if (!user) {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
@@ -25,7 +27,7 @@ const checkPermission = (module, action) => {
           STUDENTS: ['VIEW', 'CREATE', 'EDIT'],
           FINANCE: ['VIEW', 'CREATE', 'EDIT'],
           REPORTS: ['VIEW', 'EXPORT'],
-          USERS: ['VIEW', 'CREATE', 'EDIT'], // Operational users
+          USERS: ['VIEW', 'CREATE', 'EDIT', 'DELETE'],
           MASTERS: ['VIEW', 'CREATE', 'EDIT']
         },
         MANAGER: {
@@ -44,28 +46,28 @@ const checkPermission = (module, action) => {
       };
 
       const userRolePermissions = roleDefaults[user.role] || {};
-      const modulePermissions = userRolePermissions[module] || [];
+      const modulePermissions = userRolePermissions[normalizedModule] || [];
 
       // 3. Check for User-Specific Overrides in Database
       const override = await prisma.userPermissionOverride.findFirst({
         where: {
           userId: user.id,
-          module: module,
-          action: action
+          module: normalizedModule,
+          action: normalizedAction
         }
       });
 
       if (override) {
         if (override.allowed) return next();
-        else return res.status(403).json({ success: false, message: `Access denied to ${action} ${module}` });
+        else return res.status(403).json({ success: false, message: `Access denied to ${normalizedAction} ${normalizedModule}` });
       }
 
       // 4. Fallback to Role Defaults
-      if (modulePermissions.includes(action) || modulePermissions.includes('ALL')) {
+      if (modulePermissions.includes(normalizedAction) || modulePermissions.includes('ALL')) {
         return next();
       }
 
-      return res.status(403).json({ success: false, message: `Access denied to ${action} ${module}` });
+      return res.status(403).json({ success: false, message: `Access denied to ${normalizedAction} ${normalizedModule}` });
     } catch (error) {
       console.error('RBAC Error:', error);
       res.status(500).json({ success: false, message: 'Internal server error during permission check' });

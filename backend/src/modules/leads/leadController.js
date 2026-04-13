@@ -16,7 +16,8 @@ const createLead = asyncHandler(async (req, res, next) => {
 
   // Generate unique lead code
   const count = await prisma.lead.count();
-  const leadCode = `CB-${4000 + count + 1}`;
+  const leadCode = `CCRM-${4000 + count + 1}`;
+  const resolvedCounsellorId = assignedCounsellorId || (req.user.role === 'SALES' ? req.user.id : null);
 
   const lead = await prisma.lead.create({
     data: {
@@ -32,7 +33,7 @@ const createLead = asyncHandler(async (req, res, next) => {
       preferredCourseId,
       collegeId,
       source,
-      assignedCounsellorId,
+      assignedCounsellorId: resolvedCounsellorId,
       status: status || 'NEW_ENQUIRY',
       notes,
       createdBy: req.user.id,
@@ -52,6 +53,7 @@ const createLead = asyncHandler(async (req, res, next) => {
       type: 'LEAD_CREATED',
       entityType: 'LEAD',
       entityId: lead.id,
+      leadId: lead.id,
       message: `Lead ${lead.studentName} created by ${req.user.fullName}`,
       userId: req.user.id
     }
@@ -166,6 +168,7 @@ const updateLead = asyncHandler(async (req, res, next) => {
         type: 'STATUS_CHANGED',
         entityType: 'LEAD',
         entityId: id,
+        leadId: id,
         message: `Lead ${updatedLead.studentName} status changed to ${data.status}`,
         userId: req.user.id,
         metadata: { old: existingLead.status, new: data.status }

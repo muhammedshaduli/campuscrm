@@ -52,9 +52,35 @@ const getCourses = asyncHandler(async (req, res) => {
   sendResponse(res, 200, 'Courses fetched successfully', courses);
 });
 
+/**
+ * @desc    Get active counselors/managers for lead assignment
+ * @route   GET /api/masters/counselors
+ * @access  Private
+ */
+const getCounselors = asyncHandler(async (req, res) => {
+  const counselors = await prisma.user.findMany({
+    where: {
+      isActive: true,
+      role: {
+        in: ['SALES', 'MANAGER'],
+      },
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+    },
+    orderBy: [{ role: 'asc' }, { fullName: 'asc' }],
+  });
+
+  sendResponse(res, 200, 'Counselors fetched successfully', counselors);
+});
+
 module.exports = {
   getStates,
   getDistricts,
   getColleges,
   getCourses,
+  getCounselors,
 };

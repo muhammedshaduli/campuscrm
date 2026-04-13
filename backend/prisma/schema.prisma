@@ -49,39 +49,39 @@ enum Priority {
 }
 
 model User {
-  id                String         @id @default(uuid())
-  userCode          String?        @unique
-  fullName          String
-  email             String         @unique
-  phone             String?
-  username          String?        @unique
-  passwordHash      String
-  role              Role           @default(SALES)
-  designation       String?
-  departmentId      String?
-  department        Department?    @relation(fields: [departmentId], references: [id])
-  branchId          String?
-  branch            Branch?        @relation(fields: [branchId], references: [id])
+  id                 String      @id @default(uuid())
+  userCode           String?     @unique
+  fullName           String
+  email              String      @unique
+  phone              String?
+  username           String?     @unique
+  passwordHash       String
+  role               Role        @default(SALES)
+  designation        String?
+  departmentId       String?
+  department         Department? @relation(fields: [departmentId], references: [id])
+  branchId           String?
+  branch             Branch?     @relation(fields: [branchId], references: [id])
   reportingManagerId String?
-  reportingManager  User?          @relation("ManagerToSubordinate", fields: [reportingManagerId], references: [id])
-  subordinates      User[]         @relation("ManagerToSubordinate")
-  
-  isActive          Boolean        @default(true)
-  isSuspended       Boolean        @default(false)
-  lastLoginAt       DateTime?
-  createdBy         String?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  
-  assignedLeads     Lead[]         @relation("AssignedCounsellor")
-  createdLeads      Lead[]         @relation("LeadCreator")
-  followups         LeadFollowup[]
-  reminders         Reminder[]
-  activities        Activity[]
-  invoices          Invoice[]
-  payments          Payment[]      @relation("Collector")
-  tokens            RefreshToken[]
-  
+  reportingManager   User?       @relation("ManagerToSubordinate", fields: [reportingManagerId], references: [id])
+  subordinates       User[]      @relation("ManagerToSubordinate")
+
+  isActive    Boolean   @default(true)
+  isSuspended Boolean   @default(false)
+  lastLoginAt DateTime?
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  assignedLeads Lead[]         @relation("AssignedCounsellor")
+  createdLeads  Lead[]         @relation("LeadCreator")
+  followups     LeadFollowup[]
+  reminders     Reminder[]
+  activities    Activity[]
+  invoices      Invoice[]
+  payments      Payment[]      @relation("Collector")
+  tokens        RefreshToken[]
+
   permissionOverrides UserPermissionOverride[]
 }
 
@@ -130,29 +130,29 @@ model State {
 }
 
 model District {
-  id        Int       @id @default(autoincrement())
-  name      String
-  stateId   Int
-  state     State     @relation(fields: [stateId], references: [id])
-  leads     Lead[]
-  colleges  College[]
+  id       Int       @id @default(autoincrement())
+  name     String
+  stateId  Int
+  state    State     @relation(fields: [stateId], references: [id])
+  leads    Lead[]
+  colleges College[]
 
   @@unique([name, stateId])
 }
 
 model College {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
   stateId      Int
-  state        State    @relation(fields: [stateId], references: [id])
+  state        State     @relation(fields: [stateId], references: [id])
   districtId   Int?
   district     District? @relation(fields: [districtId], references: [id])
   address      String?
   contactEmail String?
   contactPhone String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   leads        Lead[]
 }
 
@@ -168,43 +168,43 @@ model Course {
 }
 
 model Lead {
-  id                  String         @id @default(uuid())
-  leadCode            String         @unique
-  studentName         String
-  phone               String
-  whatsappNumber      String?
-  dob                 DateTime?
-  email               String?
-  area                String?
-  districtId          Int?
-  district            District?      @relation(fields: [districtId], references: [id])
-  stateId             Int?
-  state               State?         @relation(fields: [stateId], references: [id])
-  preferredCourseId   String?
-  preferredCourse     Course?        @relation(fields: [preferredCourseId], references: [id])
-  collegeId           String?
-  college             College?       @relation(fields: [collegeId], references: [id])
-  source              LeadSource     @default(WEBSITE)
+  id                   String     @id @default(uuid())
+  leadCode             String     @unique
+  studentName          String
+  phone                String
+  whatsappNumber       String?
+  dob                  DateTime?
+  email                String?
+  area                 String?
+  districtId           Int?
+  district             District?  @relation(fields: [districtId], references: [id])
+  stateId              Int?
+  state                State?     @relation(fields: [stateId], references: [id])
+  preferredCourseId    String?
+  preferredCourse      Course?    @relation(fields: [preferredCourseId], references: [id])
+  collegeId            String?
+  college              College?   @relation(fields: [collegeId], references: [id])
+  source               LeadSource @default(WEBSITE)
   assignedCounsellorId String?
-  assignedCounsellor  User?          @relation("AssignedCounsellor", fields: [assignedCounsellorId], references: [id])
-  status              LeadStatus     @default(NEW_ENQUIRY)
-  callStatus          CallStatus     @default(PENDING)
-  lastCallDate        DateTime?
-  nextCallDate        DateTime?
-  notAttended         Boolean        @default(false)
-  callAttempts        Int            @default(0)
-  priority            Priority       @default(MEDIUM)
-  notes               String?
-  createdBy           String?
-  creator             User?          @relation("LeadCreator", fields: [createdBy], references: [id])
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  
-  followups           LeadFollowup[]
-  reminders           Reminder[]
-  activities          Activity[]
-  invoices            Invoice[]
-  
+  assignedCounsellor   User?      @relation("AssignedCounsellor", fields: [assignedCounsellorId], references: [id])
+  status               LeadStatus @default(NEW_ENQUIRY)
+  callStatus           CallStatus @default(PENDING)
+  lastCallDate         DateTime?
+  nextCallDate         DateTime?
+  notAttended          Boolean    @default(false)
+  callAttempts         Int        @default(0)
+  priority             Priority   @default(MEDIUM)
+  notes                String?
+  createdBy            String?
+  creator              User?      @relation("LeadCreator", fields: [createdBy], references: [id])
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  followups  LeadFollowup[]
+  reminders  Reminder[]
+  activities Activity[]
+  invoices   Invoice[]
+
   @@index([status])
   @@index([source])
   @@index([nextCallDate])
@@ -212,18 +212,18 @@ model Lead {
 }
 
 model LeadFollowup {
-  id             String     @id @default(uuid())
-  leadId         String
-  lead           Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  counsellorId   String
-  counsellor     User       @relation(fields: [counsellorId], references: [id])
-  followupDate   DateTime   @default(now())
-  nextCallDate   DateTime?
-  callStatus     CallStatus
-  leadStatus     LeadStatus
-  notes          String?
-  notAttended    Boolean    @default(false)
-  createdAt      DateTime   @default(now())
+  id           String     @id @default(uuid())
+  leadId       String
+  lead         Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  counsellorId String
+  counsellor   User       @relation(fields: [counsellorId], references: [id])
+  followupDate DateTime   @default(now())
+  nextCallDate DateTime?
+  callStatus   CallStatus
+  leadStatus   LeadStatus
+  notes        String?
+  notAttended  Boolean    @default(false)
+  createdAt    DateTime   @default(now())
 }
 
 model Reminder {
@@ -242,42 +242,47 @@ model Reminder {
 }
 
 model Activity {
-  id         String   @id @default(uuid())
+  id         String  @id @default(uuid())
   type       String
   entityType String
   entityId   String?
-  message    String
-  userId     String?
-  user       User?    @relation(fields: [userId], references: [id])
-  metadata   Json?
-  createdAt  DateTime @default(now())
+
+  // Dedicated relation field to satisfy Lead.activities
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  message   String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  metadata  Json?
+  createdAt DateTime @default(now())
 }
 
 model Invoice {
-  id            String        @id @default(uuid())
-  invoiceNumber String        @unique
+  id            String   @id @default(uuid())
+  invoiceNumber String   @unique
   leadId        String?
-  lead          Lead?         @relation(fields: [leadId], references: [id])
+  lead          Lead?    @relation(fields: [leadId], references: [id])
   studentName   String
-  amount        Decimal       @db.Decimal(10, 2)
+  amount        Decimal  @db.Decimal(10, 2)
   dueDate       DateTime
-  status        String        @default("Pending")
+  status        String   @default("Pending")
   notes         String?
   createdBy     String
-  creator       User          @relation(fields: [createdBy], references: [id])
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  
-  items         InvoiceItem[]
-  payments      Payment[]
+  creator       User     @relation(fields: [createdBy], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items    InvoiceItem[]
+  payments Payment[]
 }
 
 model InvoiceItem {
-  id        String  @id @default(uuid())
-  invoiceId String
-  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  id          String  @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   description String
-  amount    Decimal @db.Decimal(10, 2)
+  amount      Decimal @db.Decimal(10, 2)
 }
 
 model Payment {

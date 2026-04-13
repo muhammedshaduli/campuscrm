@@ -20,7 +20,8 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     newEnquiry,
     counseling,
     interested,
-    notInterested
+    notInterested,
+    pendingInvoices
   ] = await Promise.all([
     prisma.lead.count({ where }),
     prisma.lead.count({ 
@@ -43,18 +44,27 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     }),
     prisma.lead.count({ 
       where: { ...where, status: 'NOT_INTERESTED' } 
+    }),
+    prisma.invoice.count({
+      where: {
+        status: {
+          not: 'Paid',
+        },
+      },
     })
   ]);
 
   sendResponse(res, 200, 'Dashboard stats fetched successfully', {
     totalLeads,
     todayLeads,
-    admissionConfirmed,
-    todayNotAttended,
-    newEnquiry,
+    confirmedAdmissions: admissionConfirmed,
+    notAttendedToday: todayNotAttended,
+    newEnquiries: newEnquiry,
     counseling,
+    inCounseling: counseling,
     interested,
-    notInterested
+    notInterested,
+    pendingInvoices,
   });
 });
 
@@ -72,7 +82,15 @@ const getSourceSummary = asyncHandler(async (req, res) => {
     where
   });
 
-  sendResponse(res, 200, 'Source summary fetched', summary);
+  sendResponse(
+    res,
+    200,
+    'Source summary fetched',
+    summary.map((item) => ({
+      source: item.source,
+      _count: item._count.source,
+    }))
+  );
 });
 
 /**
@@ -81,13 +99,39 @@ const getSourceSummary = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const getRecentActivity = asyncHandler(async (req, res) => {
+  const where =
+    req.user.role === 'SALES'
+      ? {
+          OR: [
+            { userId: req.user.id },
+            { lead: { assignedCounsellorId: req.user.id } },
+          ],
+        }
+      : {};
+
   const activities = await prisma.activity.findMany({
+    where,
     take: 10,
     orderBy: { createdAt: 'desc' },
-    include: { user: { select: { fullName: true } } }
+    include: {
+      user: { select: { fullName: true } },
+      lead: { select: { id: true, studentName: true, leadCode: true } },
+    },
   });
   
-  sendResponse(res, 200, 'Recent activity fetched', activities);
+  sendResponse(
+    res,
+    200,
+    'Recent activity fetched',
+    activities.map((activity) => ({
+      id: activity.id,
+      action: activity.type,
+      notes: activity.message,
+      lead: activity.lead,
+      user: activity.user,
+      createdAt: activity.createdAt,
+    }))
+  );
 });
 
 module.exports = {

@@ -1,8 +1,7 @@
 /**
  * User Controller - User Management CRUD & Role/Permission Assignment
  */
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../../config/db');
 const bcrypt = require('bcrypt');
 
 const getAllUsers = async (req, res) => {
@@ -32,8 +31,19 @@ const getAllUsers = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { fullName, email, password, role, userCode, phone, departmentId } = req.body;
-    
-    const existing = await prisma.user.findUnique({ where: { email } });
+
+    if (!password) {
+      return res.status(400).json({ success: false, message: 'Password is required' });
+    }
+
+    const existing = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email,
+          mode: 'insensitive',
+        },
+      },
+    });
     if (existing) return res.status(400).json({ success: false, message: 'Email already exists' });
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -60,11 +70,27 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { fullName, role, phone, departmentId, isActive, isSuspended } = req.body;
+    const { fullName, email, role, phone, departmentId, isActive, isSuspended, userCode, designation } = req.body;
+
+    if (email) {
+      const existing = await prisma.user.findFirst({
+        where: {
+          id: { not: id },
+          email: {
+            equals: email,
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (existing) {
+        return res.status(400).json({ success: false, message: 'Email already exists' });
+      }
+    }
 
     const user = await prisma.user.update({
       where: { id },
-      data: { fullName, role, phone, departmentId, isActive, isSuspended }
+      data: { fullName, email, role, phone, departmentId, isActive, isSuspended, userCode, designation }
     });
 
     res.json({ success: true, data: user });

@@ -8,16 +8,19 @@ const { asyncHandler } = require('../../middlewares/error');
  * Generate Access & Refresh Tokens for a user.
  */
 const generateTokens = (user) => {
+  const accessTokenExpiresIn = process.env.JWT_EXPIRES_IN || '15m';
+  const refreshTokenExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+
   const accessToken = jwt.sign(
     { id: user.id, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
+    { expiresIn: accessTokenExpiresIn }
   );
 
   const refreshToken = jwt.sign(
     { id: user.id },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+    { expiresIn: refreshTokenExpiresIn }
   );
 
   return { accessToken, refreshToken };
@@ -30,12 +33,20 @@ const generateTokens = (user) => {
  */
 const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
+  const normalizedEmail = email?.trim();
 
-  if (!email || !password) {
+  if (!normalizedEmail || !password) {
     return next(new ApiError(400, 'Please provide email and password'));
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findFirst({
+    where: {
+      email: {
+        equals: normalizedEmail,
+        mode: 'insensitive',
+      },
+    },
+  });
 
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return next(new ApiError(401, 'Incorrect email or password'));
@@ -45,26 +56,31 @@ const login = asyncHandler(async (req, res, next) => {
     return next(new ApiError(401, 'Your account is inactive'));
   }
 
-  const { accessToken, refreshToken } = generateTokens(user);
+  const authenticatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
+
+  const { accessToken, refreshToken } = generateTokens(authenticatedUser);
 
   // Store refresh token in DB
   await prisma.refreshToken.create({
     data: {
       token: refreshToken,
-      userId: user.id,
+      userId: authenticatedUser.id,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     },
   });
 
   sendResponse(res, 200, 'Logged in successfully', {
     user: {
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      userCode: user.userCode,
-      departmentId: user.departmentId
+      id: authenticatedUser.id,
+      fullName: authenticatedUser.fullName,
+      email: authenticatedUser.email,
+      role: authenticatedUser.role,
+      phone: authenticatedUser.phone,
+      userCode: authenticatedUser.userCode,
+      departmentId: authenticatedUser.departmentId,
     },
     accessToken,
     refreshToken,

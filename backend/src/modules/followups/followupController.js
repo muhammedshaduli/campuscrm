@@ -54,6 +54,7 @@ const addFollowup = asyncHandler(async (req, res, next) => {
       type: 'FOLLOWUP_ADDED',
       entityType: 'LEAD',
       entityId: leadId,
+      leadId,
       message: `Follow-up added for ${lead.studentName}: ${callStatus} -> ${leadStatus}`,
       userId: req.user.id,
       metadata: { followupId: followup.id }

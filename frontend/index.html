@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CampusBridge CRM — Premium College Admissions Management</title>
+  <meta name="application-name" content="Calviz CampusCRM">
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <title>Calviz CampusCRM | Admissions Management</title>
   
   <!-- GOOGLE FONTS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,14 +29,14 @@
   <div id="login-overlay" class="login-overlay" style="display:flex;">
     <div class="login-card">
       <div class="login-header">
-        <div class="logo-mark" style="width:50px; height:50px; font-size:1.5rem;">CB</div>
-        <h2 class="login-title">CampusBridge Portal</h2>
-        <p class="login-subtitle">Admissions Management CRM</p>
+        <img class="brand-logo brand-logo-auth" src="images/logo.png" alt="Calviz CampusCRM logo">
+        <h2 class="login-title">Calviz CampusCRM</h2>
+        <p class="login-subtitle">Admissions management platform</p>
       </div>
       <form id="login-form" onsubmit="handleLogin(event)">
         <div class="form-group" style="margin-bottom:15px;">
           <label class="form-label">Email Address</label>
-          <input type="email" id="login-email" class="form-input" placeholder="admin@campusbridge.com" required>
+          <input type="email" id="login-email" class="form-input" placeholder="admin@calviz.in" required>
         </div>
         <div class="form-group" style="margin-bottom:20px;">
           <label class="form-label">Password</label>
@@ -43,7 +45,7 @@
         <button type="submit" class="btn-primary w-full" id="login-btn" style="justify-content:center; padding:14px;">Sign In to Dashboard</button>
       </form>
       <div class="login-footer">
-        <p>© 2026 CampusBridge Admissions. All Rights Reserved.</p>
+        <p>© 2026 Calviz CampusCRM. All rights reserved.</p>
       </div>
     </div>
   </div>
@@ -55,10 +57,12 @@
          ============================= -->
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-mark">CB</div>
+        <div class="logo-badge" aria-hidden="true">
+          <img src="images/logo.png" alt="">
+        </div>
         <div class="logo-text">
-          <span class="brand">CampusBridge</span>
-          <span class="tagline">Admissions Ops CRM</span>
+          <span class="brand">Calviz CampusCRM</span>
+          <span class="tagline">Admissions Management</span>
         </div>
         <button class="mobile-close-btn" style="display:none; margin-left: auto; background:none; border:none; color:var(--text-main);" onclick="document.getElementById('sidebar').classList.remove('active')">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -148,7 +152,7 @@
       </div>
 
       <div class="sidebar-footer">
-        <div class="sidebar-avatar" id="sidebar-avatar-initials">CB</div>
+        <div class="sidebar-avatar" id="sidebar-avatar-initials">CC</div>
         <div class="sidebar-user">
           <span class="user-name" id="sidebar-user-name">Loading...</span>
           <span class="user-role" id="sidebar-user-role">...</span>
@@ -172,7 +176,7 @@
           <button class="mobile-menu-btn" style="display:none;" onclick="document.getElementById('sidebar').classList.add('active')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <div class="header-title">CampusBridge <span>CRM</span></div>
+          <div class="header-title">Calviz <span>CampusCRM</span></div>
           <div class="header-search">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="global-search" placeholder="Search students, leads, applications...">
@@ -186,7 +190,7 @@
           </button>
           
           <div class="header-profile" onclick="showPage('profile', null)">
-            <div class="profile-img" id="header-avatar-initials">CB</div>
+            <div class="profile-img" id="header-avatar-initials">CC</div>
             <span class="profile-info" id="header-user-name">Loading...</span>
           </div>
           
@@ -557,7 +561,7 @@
           <div class="profile-main-info">
             <div class="profile-name-row">
               <h2 class="profile-name" id="profile-name">Arjun Krishnan</h2>
-              <span class="profile-id" id="profile-id">ID: CB-1284 / ADM-2026</span>
+              <span class="profile-id" id="profile-id">ID: CCRM-1284 / ADM-2026</span>
             </div>
             <div class="profile-tags" id="profile-tags">
               <span class="badge badge-blue">B.Tech CS</span>
@@ -850,7 +854,7 @@
                 <div class="card-body">
                   <div class="form-grid">
                     <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" value="Rahul Sharma"></div>
-                    <div class="form-group"><label class="form-label">Internal ID</label><input type="text" class="form-input" value="CB-OFF-01" disabled></div>
+                    <div class="form-group"><label class="form-label">Internal ID</label><input type="text" class="form-input" value="CCRM-OFF-01" disabled></div>
                     <div class="form-group full"><label class="form-label">Office Address</label><input type="text" class="form-input" value="3rd Floor, Silicon Towers, Kochi, Kerala"></div>
                   </div>
                   <button class="btn-primary mt-20">Save Changes</button>
@@ -1130,7 +1134,7 @@
             </div>
             <div class="form-group">
               <label class="form-label">Email Address *</label>
-              <input type="email" id="user-email" class="form-input" placeholder="user@campusbridge.com" required>
+              <input type="email" id="user-email" class="form-input" placeholder="user@calviz.in" required>
             </div>
             <div class="form-group">
               <label class="form-label">Phone Number</label>
@@ -1142,7 +1146,7 @@
             </div>
             <div class="form-group">
               <label class="form-label">Employee Code</label>
-              <input type="text" id="user-code" class="form-input" placeholder="CB-EMP-001">
+              <input type="text" id="user-code" class="form-input" placeholder="CCRM-EMP-001">
             </div>
             <div class="form-group">
               <label class="form-label">Role *</label>

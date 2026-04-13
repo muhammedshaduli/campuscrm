@@ -6,8 +6,11 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DATABASE_URL=postgresql://root:secret@db:5432/campusbridge_crm?schema=public
+      - DATABASE_URL=postgresql://root:secret@db:5432/calviz_campuscrm?schema=public
       - JWT_SECRET=your_ultra_secret_access_key_123456
+      - JWT_REFRESH_SECRET=your_ultra_secret_refresh_key_987654
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
       - NODE_ENV=production
     depends_on:
       - db
@@ -18,7 +21,7 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=campusbridge_crm
+      - POSTGRES_DB=calviz_campuscrm
     ports:
       - "5432:5432"
     volumes:

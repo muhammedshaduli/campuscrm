@@ -1,5 +1,5 @@
 /**
- * CampusBridge CRM Backend - Main Server Entry Point
+ * Calviz CampusCRM Backend - Main Server Entry Point
  */
 require('dotenv').config();
 const app = require('./app');

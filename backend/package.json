@@ -1,14 +1,16 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Calviz CampusCRM backend service",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "seed": "node prisma/seed.js",
     "prisma:seed": "node prisma/seed.js",
     "prisma:migrate": "npx prisma migrate dev",
-    "prisma:generate": "npx prisma generate"
+    "prisma:generate": "npx prisma generate",
+    "prisma:validate": "npx prisma validate"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.use(protect);
 
-router.post('/', restrictTo('ADMIN', 'COUNSELLOR'), createLead);
+router.post('/', restrictTo('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'SALES'), createLead);
 router.get('/', getLeads);
 router.get('/:id', getLeadById);
-router.patch('/:id', restrictTo('ADMIN', 'COUNSELLOR'), updateLead);
+router.patch('/:id', restrictTo('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'SALES'), updateLead);
 
 module.exports = router;

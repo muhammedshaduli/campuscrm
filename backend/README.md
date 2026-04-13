@@ -1,6 +1,6 @@
-# CampusBridge CRM Backend
+# Calviz CampusCRM Backend
 
-This is the production-ready Node.js/Express backend for the CampusBridge Admissions CRM. It uses PostgreSQL with Prisma ORM and features a modular arquitectura for high scalability.
+This is the production-ready Node.js/Express backend for Calviz CampusCRM. It uses PostgreSQL with Prisma ORM and features a modular architecture for scalable admissions operations.
 
 ## 🚀 Features
 - **JWT & RBAC**: Advanced authentication with access/refresh tokens and Role-Based Access Control.
@@ -47,10 +47,12 @@ This is the production-ready Node.js/Express backend for the CampusBridge Admiss
 ## 📡 API Documentation
 The API follows a modular structure. Main endpoints:
 - `POST /api/auth/login`: Authenticate and get tokens.
+- `GET /api/health`: Check backend health.
 - `GET /api/dashboard/stats`: Get KPI summaries for the dashboard.
 - `GET /api/leads`: List student leads with advanced filters.
 - `POST /api/followups`: Record a new student interaction.
 
 ## 👥 Seed Accounts
-- **Super Admin**: `admin@campusbridge.com` / `password123`
-- **Counsellor**: `sreekanth@campusbridge.com` / `password123`
+- **Admin**: `admin@calviz.in` / `Admin@123`
+- **Manager**: `Manager@calviz.in` / `Manager@123`
+- **Sales**: `User1@calviz.in` / `Sales@123`

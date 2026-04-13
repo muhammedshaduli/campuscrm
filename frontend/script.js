@@ -1,28 +1,57 @@
 /**
- * CAMPUSBRIDGE CRM - CORE SCRIPT
+ * CALVIZ CAMPUSCRM - CORE SCRIPT
  * Production-ready API Integration & Admissions Logic
  */
 
 /* =========================================
    1. CONFIGURATION & STATE
    ========================================= */
-const API_BASE_URL = 'http://localhost:5000/api';
+const APP_NAME = 'Calviz CampusCRM';
+const APP_TITLE = `${APP_NAME} | Admissions Management`;
+const DEFAULT_SOURCE_OPTIONS = [
+  { id: 'WEBSITE', name: 'Website' },
+  { id: 'WALK_IN', name: 'Walk-in' },
+  { id: 'WHATSAPP', name: 'WhatsApp' },
+  { id: 'INSTAGRAM', name: 'Instagram' },
+  { id: 'FACEBOOK_ADS', name: 'Facebook Ads' },
+  { id: 'GOOGLE_ADS', name: 'Google Ads' },
+  { id: 'REFERRAL', name: 'Referral' }
+];
 
-const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'campusbridge_access_token',
-  REFRESH_TOKEN: 'campusbridge_refresh_token',
-  USER: 'campusbridge_user'
+const resolveApiBaseUrl = () => {
+  const configuredApiBaseUrl = document.querySelector('meta[name="api-base-url"]')?.content?.trim();
+  if (configuredApiBaseUrl) {
+    return configuredApiBaseUrl.replace(/\/$/, '');
+  }
+
+  const isLocal =
+    window.location.protocol === 'file:' ||
+    ['', 'localhost', '127.0.0.1'].includes(window.location.hostname);
+
+  return isLocal
+    ? 'http://localhost:5000/api'
+    : 'https://api-campuscrm.nextgenvarietex.com/api';
 };
 
-let CURRENT_USER = null;
-let MASTERS = {
+const API_BASE_URL = resolveApiBaseUrl();
+
+const STORAGE_KEYS = {
+  ACCESS_TOKEN: 'calviz_campuscrm_access_token',
+  REFRESH_TOKEN: 'calviz_campuscrm_refresh_token',
+  USER: 'calviz_campuscrm_user'
+};
+
+const getDefaultMastersState = () => ({
   states: [],
   districts: [],
   colleges: [],
   courses: [],
   counsellors: [],
-  sources: ['Website', 'Walk-in', 'WhatsApp', 'Instagram', 'Facebook Ads', 'Google Ads', 'Referral', 'Other']
-};
+  sources: DEFAULT_SOURCE_OPTIONS
+});
+
+let CURRENT_USER = null;
+let MASTERS = getDefaultMastersState();
 
 /* =========================================
    2. API & AUTH HELPERS
@@ -163,7 +192,7 @@ function handleLogout() {
   localStorage.removeItem(STORAGE_KEYS.USER);
   
   CURRENT_USER = null;
-  MASTERS = { states: [], districts: [], colleges: [], courses: [] };
+  MASTERS = getDefaultMastersState();
   LEADS_DATA = [];
   
   document.getElementById('main-app').style.display = 'none';
@@ -228,6 +257,12 @@ function toggleLoader(show) {
    ========================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.title = APP_TITLE;
+  const loginFooter = document.querySelector('.login-footer p');
+  if (loginFooter) {
+    loginFooter.innerText = '© 2026 Calviz CampusCRM. All rights reserved.';
+  }
+
   const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   const userData = localStorage.getItem(STORAGE_KEYS.USER);
 
@@ -313,10 +348,10 @@ function renderDashboardStats(stats) {
 
   updateKpi('totalLeads', stats.totalLeads);
   updateKpi('todayLeads', stats.todayLeads);
-  updateKpi('confirmedAdmissions', stats.confirmedAdmissions);
-  updateKpi('notAttendedToday', stats.notAttendedToday);
-  updateKpi('newEnquiries', stats.newEnquiries);
-  updateKpi('inCounseling', stats.inCounseling);
+  updateKpi('confirmedAdmissions', stats.confirmedAdmissions ?? stats.admissionConfirmed);
+  updateKpi('notAttendedToday', stats.notAttendedToday ?? stats.todayNotAttended);
+  updateKpi('newEnquiries', stats.newEnquiries ?? stats.newEnquiry);
+  updateKpi('inCounseling', stats.inCounseling ?? stats.counseling);
   updateKpi('interested', stats.interested);
   updateKpi('notInterested', stats.notInterested);
   
@@ -338,20 +373,30 @@ function renderRecentActivity(activities) {
   }
   
   activityList.innerHTML = activities.map(act => {
-    const studentName = act.lead?.studentName || 'Unknown Student';
+    const studentName = act.lead?.studentName || act.message || 'System Activity';
     const timestamp = act.createdAt ? new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
-    const actionLabel = act.action ? act.action.replace(/_/g, ' ') : 'Interaction';
+    const actionLabel = (act.action || act.type) ? (act.action || act.type).replace(/_/g, ' ') : 'Interaction';
     
     return `
       <div class="reminder-item" style="border-left:3px solid var(--secondary);">
         <div class="rem-date">${timestamp}</div>
         <div class="rem-text">
           <strong>${actionLabel}</strong>: ${studentName}
-          <div class="text-xs text-muted">${act.notes || ''}</div>
+          <div class="text-xs text-muted">${act.notes || act.message || ''}</div>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function formatEnumLabel(value) {
+  return value
+    ? String(value)
+        .toLowerCase()
+        .split('_')
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ')
+    : '';
 }
 
 function renderSourceSummary(sources) {
@@ -367,8 +412,8 @@ function renderSourceSummary(sources) {
   const denominator = totalLeadsCount > 0 ? totalLeadsCount : 1; // Prevent division by zero
   
   const sourceData = sources.map(s => ({
-    n: s.source || 'Direct',
-    v: s._count ? Math.round((s._count / denominator) * 100) : 0,
+    n: formatEnumLabel(s.source) || 'Direct',
+    v: Math.round((((typeof s._count === 'number' ? s._count : s._count?.source) || 0) / denominator) * 100),
     c: 'var(--primary)'
   })).sort((a,b) => b.v - a.v);
 
@@ -480,6 +525,11 @@ async function loadDistrictsForState(stateId, targetSelectId) {
 let currentLeadView = 'table';
 
 function showPage(pageId, navElement) {
+  if (pageId === 'users' && (!CURRENT_USER || !['SUPER_ADMIN', 'ADMIN'].includes(CURRENT_USER.role))) {
+    showToast('Unauthorized access', 'danger');
+    return;
+  }
+
   // Update active nav item
   if (navElement) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -516,16 +566,23 @@ function showPage(pageId, navElement) {
     case 'documents': populateDocuments(); break;
     case 'payments': populatePayments(); break;
     case 'reports': populateReports(); break;
+    case 'users': fetchUsers(); break;
   }
 }
 
 function openModal(id) { 
   const modal = document.getElementById(id || 'leadModal');
-  if (modal) modal.classList.add('active'); 
+  if (modal) {
+    modal.style.display = '';
+    modal.classList.add('active');
+  }
 }
 function closeModal(id) { 
   const modal = document.getElementById(id || 'leadModal');
-  if (modal) modal.classList.remove('active'); 
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = '';
+  }
 }
 
 function populateModalSelectors() {
@@ -625,7 +682,7 @@ function populateDashboard() {
         
         return `
           <tr>
-            <td><div class="student-cell"><div class="avatar-sm" style="background:var(--primary)">${initials}</div><div><strong>${studentName}</strong><div class="text-xs text-muted">${lead.leadCode || 'CB-XXXX'}</div></div></div></td>
+            <td><div class="student-cell"><div class="avatar-sm" style="background:var(--primary)">${initials}</div><div><strong>${studentName}</strong><div class="text-xs text-muted">${lead.leadCode || 'CCRM-XXXX'}</div></div></div></td>
             <td>${counsellor}</td>
             <td>${lead.state?.name || 'N/A'}</td>
             <td><span class="badge badge-blue" style="font-size:0.6rem">${lead.preferredCourse?.name || 'N/A'}</span></td>
@@ -687,7 +744,7 @@ function populateLeads() {
               <div class="avatar-sm" style="background:var(--primary)">${initials}</div>
               <div>
                 <strong>${studentName}</strong>
-                <div class="text-xs text-muted">${lead.leadCode || 'CB-XXXX'} | Area: ${lead.area || 'N/A'}</div>
+                <div class="text-xs text-muted">${lead.leadCode || 'CCRM-XXXX'} | Area: ${lead.area || 'N/A'}</div>
               </div>
             </div>
           </td>
@@ -782,7 +839,7 @@ function populateStudents() {
     const initials = studentName.split(' ').map(n=>n[0]).join('') || 'S';
     return `
       <tr>
-        <td><div class="student-cell"><div class="avatar-sm" style="background:var(--primary)">${initials}</div><div><strong>${studentName}</strong><div class="text-xs text-muted">${s.leadCode || 'CB-XXXX'}</div></div></div></td>
+        <td><div class="student-cell"><div class="avatar-sm" style="background:var(--primary)">${initials}</div><div><strong>${studentName}</strong><div class="text-xs text-muted">${s.leadCode || 'CCRM-XXXX'}</div></div></div></td>
         <td>${s.phone || 'N/A'}</td>
         <td>${s.preferredCourse?.name || 'N/A'}</td>
         <td>${s.college?.name || 'N/A'}</td>
@@ -811,7 +868,7 @@ function populateApplications() {
     
     return `
       <tr>
-        <td><strong>${a.leadCode || 'CB-XXXX'}</strong></td>
+        <td><strong>${a.leadCode || 'CCRM-XXXX'}</strong></td>
         <td>${studentName}</td>
         <td>${course}</td>
         <td><span class="badge ${statusClass}">${statusLabel}</span></td>
@@ -1213,31 +1270,6 @@ window.onload = () => {
   // Keeping window.onload only for strictly aesthetic non-data tasks if needed
 };
 
-/**
- * UI: showPage extension for specific roles
- */
-function showPage(pageId, navEl) {
-  if (pageId === 'users' && !['SUPER_ADMIN', 'ADMIN'].includes(CURRENT_USER.role)) {
-    showToast('Unauthorized access', 'danger');
-    return;
-  }
-  
-  if (pageId === 'users') {
-    fetchUsers();
-  }
-  
-  // Call original showPage logic components
-  const sections = document.querySelectorAll('.page-content');
-  const navItems = document.querySelectorAll('.nav-item');
-
-  sections.forEach(s => s.classList.remove('active'));
-  navItems.forEach(n => n.classList.remove('active'));
-
-  const target = document.getElementById(pageId);
-  if (target) target.classList.add('active');
-  if (navEl) navEl.classList.add('active');
-}
-
 /* =========================================
    USER MANAGEMENT LOGIC
    ========================================= */
@@ -1262,7 +1294,7 @@ function renderUsersTable(users) {
   users.forEach(u => {
     const row = document.createElement('tr');
     const lastLogin = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Never';
-    const statusClass = u.isActive ? 'badge-confirmed' : 'badge-danger';
+    const statusClass = u.isActive ? 'badge-green' : 'badge-danger';
     
     row.innerHTML = `
       <td data-label="User Info">
@@ -1318,7 +1350,7 @@ function openUserModal(userId = null) {
     if(passGroup) passGroup.style.display = 'block';
   }
   
-  modal.style.display = 'flex';
+  openModal('userModal');
 }
 
 async function saveUser() {
@@ -1357,7 +1389,7 @@ async function saveUser() {
 }
 
 async function toggleUserStatus(userId) {
-  if (!confirm('Are you sure you want to toggle this user s status?')) return;
+  if (!confirm("Are you sure you want to toggle this user's status?")) return;
   
   try {
     await apiRequest(`/users/${userId}/toggle-activation`, { method: 'PATCH' });
@@ -1406,7 +1438,7 @@ function openPermissionModal(userId, userName) {
     tbody.appendChild(row);
   });
 
-  document.getElementById('permissionModal').style.display = 'flex';
+  openModal('permissionModal');
 }
 
 async function savePermissions() {

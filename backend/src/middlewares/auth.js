@@ -58,5 +58,6 @@ const restrictTo = (...roles) => {
 
 module.exports = {
   protect,
+  authenticate: protect, // Added alias for compatibility
   restrictTo,
 };
