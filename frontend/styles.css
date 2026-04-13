@@ -909,7 +909,7 @@ svg {
 }
 
 .pipeline-stage {
-  flex: 1;
+  flex: 0 0 80px;
   min-width: 80px;
   text-align: center;
   position: relative;
@@ -1291,12 +1291,14 @@ svg {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
 .dash-side {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
 @media (max-width: 1200px) {
@@ -1687,6 +1689,12 @@ svg {
 }
 
 @media (max-width: 768px) {
+  .card-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
   .header-left .header-title {
     font-size: 1.1rem;
     white-space: normal;
@@ -1775,6 +1783,11 @@ svg {
 
   .form-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .pipeline-stage {
+    flex-basis: 72px;
+    min-width: 72px;
   }
 
   .modal-overlay {
