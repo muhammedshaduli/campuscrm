@@ -52,6 +52,34 @@ const getDefaultMastersState = () => ({
 
 let CURRENT_USER = null;
 let MASTERS = getDefaultMastersState();
+let LEADS_DATA = [];
+let DASHBOARD_STATE = {
+  stats: {},
+  sourceSummary: [],
+  recentActivity: [],
+  pipeline: [],
+  recentInquiries: [],
+  reminders: [],
+  counselorPerformance: [],
+  topStates: []
+};
+let ACTIVE_MODAL_ID = null;
+let currentLeadView = 'table';
+
+const DEFAULT_AUTHENTICATED_PAGE = 'dashboard';
+const LOGIN_PAGE_ID = 'login';
+const MODAL_OPEN_CLASS = 'modal-open';
+const SIDEBAR_OPEN_CLASS = 'sidebar-open';
+
+const PIPELINE_TONE_COLORS = {
+  navy: 'var(--navy)',
+  indigo: 'var(--primary)',
+  cyan: 'var(--secondary)',
+  rose: 'var(--danger)',
+  slate: '#64748b',
+  emerald: 'var(--success)',
+  amber: 'var(--accent)'
+};
 
 /* =========================================
    2. API & AUTH HELPERS
@@ -169,12 +197,9 @@ async function handleLogin(event) {
     
     CURRENT_USER = user;
     showToast(`Welcome back, ${user.fullName}!`, 'success');
-    
-    // Smooth transition into app
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('main-app').style.display = 'flex';
-    
-    initApp();
+    showAuthenticatedState();
+    syncBrowserRoute(DEFAULT_AUTHENTICATED_PAGE, { replace: true });
+    await initApp(DEFAULT_AUTHENTICATED_PAGE);
   } catch (error) {
     // Error handled by apiRequest toast
   } finally {
@@ -194,9 +219,18 @@ function handleLogout() {
   CURRENT_USER = null;
   MASTERS = getDefaultMastersState();
   LEADS_DATA = [];
-  
-  document.getElementById('main-app').style.display = 'none';
-  document.getElementById('login-overlay').style.display = 'flex';
+  DASHBOARD_STATE = {
+    stats: {},
+    sourceSummary: [],
+    recentActivity: [],
+    pipeline: [],
+    recentInquiries: [],
+    reminders: [],
+    counselorPerformance: [],
+    topStates: []
+  };
+  showLoginState();
+  syncBrowserRoute(LOGIN_PAGE_ID, { replace: true });
   showToast('Logged out successfully', 'info');
 }
 
@@ -227,6 +261,102 @@ function updateUserProfile() {
       navUsers.style.display = 'none';
     }
   }
+}
+
+function isHistoryRoutingEnabled() {
+  return window.location.protocol !== 'file:';
+}
+
+function getKnownPageIds() {
+  return Array.from(document.querySelectorAll('.page-content[id]')).map((page) => page.id);
+}
+
+function getRoutePageId(pathname = window.location.pathname) {
+  if (!isHistoryRoutingEnabled()) {
+    return DEFAULT_AUTHENTICATED_PAGE;
+  }
+
+  const normalizedPath = pathname.replace(/\/+$/, '') || '/';
+  const slug = normalizedPath.split('/').filter(Boolean).pop() || DEFAULT_AUTHENTICATED_PAGE;
+  if (slug === LOGIN_PAGE_ID) {
+    return LOGIN_PAGE_ID;
+  }
+
+  return getKnownPageIds().includes(slug) ? slug : DEFAULT_AUTHENTICATED_PAGE;
+}
+
+function getRoutePathForPage(pageId) {
+  if (pageId === LOGIN_PAGE_ID) {
+    return '/login';
+  }
+
+  return pageId === DEFAULT_AUTHENTICATED_PAGE ? '/dashboard' : `/${pageId}`;
+}
+
+function syncBrowserRoute(pageId, { replace = false } = {}) {
+  if (!isHistoryRoutingEnabled()) {
+    return;
+  }
+
+  const targetPath = getRoutePathForPage(pageId);
+  if (window.location.pathname === targetPath) {
+    return;
+  }
+
+  const method = replace ? 'replaceState' : 'pushState';
+  window.history[method]({ pageId }, '', targetPath);
+}
+
+function showLoginState() {
+  document.body.classList.remove(MODAL_OPEN_CLASS, SIDEBAR_OPEN_CLASS);
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  closeMobileSidebar();
+  closeAllModals();
+}
+
+function showAuthenticatedState() {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('main-app').style.display = 'flex';
+}
+
+function getStoredAuthState() {
+  const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+  const userData = localStorage.getItem(STORAGE_KEYS.USER);
+
+  if (!token || !userData) {
+    return null;
+  }
+
+  try {
+    return {
+      token,
+      user: JSON.parse(userData)
+    };
+  } catch (error) {
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    return null;
+  }
+}
+
+function handleRouteChange() {
+  const routePage = getRoutePageId();
+  const authState = getStoredAuthState();
+
+  if (!authState) {
+    CURRENT_USER = null;
+    showLoginState();
+    syncBrowserRoute(LOGIN_PAGE_ID, { replace: routePage !== LOGIN_PAGE_ID });
+    return;
+  }
+
+  CURRENT_USER = authState.user;
+  showAuthenticatedState();
+
+  const targetPage = routePage === LOGIN_PAGE_ID ? DEFAULT_AUTHENTICATED_PAGE : routePage;
+  showPage(targetPage, null, { updateRoute: routePage !== targetPage, replaceRoute: routePage === LOGIN_PAGE_ID });
 }
 
 /* =========================================
@@ -263,30 +393,35 @@ document.addEventListener('DOMContentLoaded', () => {
     loginFooter.innerText = '© 2026 Calviz CampusCRM. All rights reserved.';
   }
 
-  const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-  const userData = localStorage.getItem(STORAGE_KEYS.USER);
+  bindGlobalUiInteractions();
+  window.addEventListener('popstate', handleRouteChange);
 
-  if (token && userData) {
-    CURRENT_USER = JSON.parse(userData);
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('main-app').style.display = 'flex';
-    initApp();
+  const authState = getStoredAuthState();
+  const routePage = getRoutePageId();
+
+  if (authState) {
+    CURRENT_USER = authState.user;
+    showAuthenticatedState();
+    const initialPage = routePage === LOGIN_PAGE_ID ? DEFAULT_AUTHENTICATED_PAGE : routePage;
+    syncBrowserRoute(initialPage, { replace: routePage !== initialPage });
+    initApp(initialPage);
   } else {
-    document.getElementById('login-overlay').style.display = 'flex';
-    document.getElementById('main-app').style.display = 'none';
+    showLoginState();
+    syncBrowserRoute(LOGIN_PAGE_ID, { replace: routePage !== LOGIN_PAGE_ID });
   }
 });
 
-async function initApp() {
+async function initApp(targetPage = DEFAULT_AUTHENTICATED_PAGE) {
   toggleLoader(true);
   try {
     updateUserProfile();
-    await loadMasterData();
-    await fetchDashboardData();
-    await fetchLeads(); // Fetch initial leads
-    // Populate dropdowns after data load
+    await Promise.all([
+      loadMasterData(),
+      fetchDashboardData(),
+      fetchLeads({ limit: 100 })
+    ]);
     populateFormDropdowns();
-    showPage('dashboard');
+    showPage(targetPage, null, { updateRoute: false });
   } catch (error) {
     console.error('Failed to initialize app data:', error);
   } finally {
@@ -325,25 +460,39 @@ async function loadMasterData() {
  */
 async function fetchDashboardData() {
   try {
-    const [statsRes, activityRes, sourceRes] = await Promise.all([
-      apiRequest('/dashboard/stats'),
-      apiRequest('/dashboard/recent-activity'),
-      apiRequest('/dashboard/source-summary')
-    ]);
+    const result = await apiRequest('/dashboard/overview');
+    DASHBOARD_STATE = {
+      stats: result.data?.stats || {},
+      sourceSummary: result.data?.sourceSummary || [],
+      recentActivity: result.data?.recentActivity || [],
+      pipeline: result.data?.pipeline || [],
+      recentInquiries: result.data?.recentInquiries || [],
+      reminders: result.data?.reminders || [],
+      counselorPerformance: result.data?.counselorPerformance || [],
+      topStates: result.data?.topStates || []
+    };
 
-    renderDashboardStats(statsRes.data);
-    renderRecentActivity(activityRes.data);
-    renderSourceSummary(sourceRes.data);
+    renderDashboard();
   } catch (error) {
-     console.error('Dashboard sync failed');
+    console.error('Dashboard sync failed');
   }
 }
 
-function renderDashboardStats(stats) {
-  // Use data-kpi attributes for robust selection
+function renderDashboard() {
+  renderDashboardStats(DASHBOARD_STATE.stats || {});
+  renderDashboardPipeline(DASHBOARD_STATE.pipeline || []);
+  renderRecentInquiries(DASHBOARD_STATE.recentInquiries || []);
+  renderDashboardReminders(DASHBOARD_STATE.reminders || []);
+  renderRecentActivity(DASHBOARD_STATE.recentActivity || []);
+  renderSourceSummary(DASHBOARD_STATE.sourceSummary || []);
+  renderCounselorPerformance(DASHBOARD_STATE.counselorPerformance || []);
+  renderTopStates(DASHBOARD_STATE.topStates || []);
+}
+
+function renderDashboardStats(stats = {}) {
   const updateKpi = (key, value) => {
     const el = document.querySelector(`.kpi-card[data-kpi="${key}"] .kpi-value`);
-    if (el) el.innerText = value || 0;
+    if (el) el.innerText = value ?? 0;
   };
 
   updateKpi('totalLeads', stats.totalLeads);
@@ -363,12 +512,94 @@ function renderDashboardStats(stats) {
   if (admissionsBadge) admissionsBadge.innerText = stats.confirmedAdmissions || 0;
 }
 
+function renderEmptyCardState(message) {
+  return `<div class="text-sm text-muted empty-state-copy">${message}</div>`;
+}
+
+function renderDashboardPipeline(stages) {
+  const container = document.getElementById('dashboard-pipeline');
+  if (!container) return;
+
+  if (!stages || stages.length === 0) {
+    container.innerHTML = renderEmptyCardState('No pipeline data available yet.');
+    return;
+  }
+
+  container.innerHTML = stages.map((stage) => `
+    <div class="pipeline-stage">
+      <div class="stage-bar" style="background:${PIPELINE_TONE_COLORS[stage.tone] || 'var(--primary)'};">${stage.count ?? 0}</div>
+      <div class="stage-name">${stage.label || formatEnumLabel(stage.status)}</div>
+    </div>
+  `).join('');
+}
+
+function renderRecentInquiries(leads) {
+  const tableBody = document.getElementById('recent-leads-body');
+  if (!tableBody) return;
+
+  if (!leads || leads.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-20 text-muted">No recent inquiry data to display yet.</td></tr>';
+    return;
+  }
+
+  tableBody.innerHTML = leads.map((lead) => {
+    const studentName = lead.studentName || 'Unknown Student';
+    const initials = studentName.split(' ').map((part) => part[0]).join('') || 'S';
+    const counsellor = lead.assignedCounsellor?.fullName || 'Unassigned';
+    const statusClass = getStatusBadgeClass(lead.status);
+    const statusLabel = formatEnumLabel(lead.status) || 'Pending';
+    const priorityClass = getPriorityBadgeClass(lead.priority);
+
+    return `
+      <tr>
+        <td data-label="Student Name"><div class="student-cell"><div class="avatar-sm" style="background:var(--primary)">${initials}</div><div><strong>${studentName}</strong><div class="text-xs text-muted">${lead.leadCode || 'N/A'}</div></div></div></td>
+        <td data-label="Counsellor">${counsellor}</td>
+        <td data-label="Pref. State">${lead.state?.name || 'N/A'}</td>
+        <td data-label="Interested Course"><span class="badge badge-blue" style="font-size:0.6rem">${lead.preferredCourse?.name || 'N/A'}</span></td>
+        <td data-label="Status"><span class="badge ${statusClass}">${statusLabel}</span></td>
+        <td data-label="Priority"><span class="badge ${priorityClass}">${formatEnumLabel(lead.priority) || 'Medium'}</span></td>
+        <td data-label="Actions"><button class="text-primary font-600" onclick="renderProfile('${lead.id}')">View</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderDashboardReminders(reminders) {
+  const remindersList = document.getElementById('dash-reminders');
+  if (!remindersList) return;
+
+  if (!reminders || reminders.length === 0) {
+    remindersList.innerHTML = renderEmptyCardState('No pending follow-up reminders.');
+    return;
+  }
+
+  remindersList.innerHTML = reminders.map((reminder) => {
+    const dueDate = reminder.dueDate ? new Date(reminder.dueDate) : null;
+    const dueLabel = dueDate
+      ? dueDate.toLocaleDateString([], { day: '2-digit', month: 'short' })
+      : 'TBD';
+    const isOverdue = dueDate ? dueDate.getTime() < Date.now() : false;
+    const phone = reminder.lead?.phone || 'No phone';
+
+    return `
+      <div class="reminder-item ${isOverdue ? 'overdue' : ''}" style="border-left:3px solid ${isOverdue ? 'var(--danger)' : 'var(--primary)'};">
+        <div class="rem-date">${dueLabel}</div>
+        <div class="rem-text">
+          <strong>${reminder.title || `Call ${reminder.lead?.studentName || 'Student'}`}</strong>
+          <div class="text-xs text-muted">${reminder.lead?.studentName || 'General reminder'}${reminder.lead?.leadCode ? ` • ${reminder.lead.leadCode}` : ''}</div>
+          <div class="text-xs text-muted">${phone}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderRecentActivity(activities) {
   const activityList = document.getElementById('dash-activity-list');
   if (!activityList) return;
   
   if (!activities || activities.length === 0) {
-    activityList.innerHTML = '<div class="text-sm text-muted">No recent activity found</div>';
+    activityList.innerHTML = renderEmptyCardState('No recent activity found.');
     return;
   }
   
@@ -404,12 +635,14 @@ function renderSourceSummary(sources) {
   if (!container) return;
   
   if (!sources || sources.length === 0) {
-    container.innerHTML = '<div class="text-sm text-muted">No source data available</div>';
+    container.innerHTML = renderEmptyCardState('No source data available.');
     return;
   }
   
-  const totalLeadsCount = LEADS_DATA ? LEADS_DATA.length : 0;
-  const denominator = totalLeadsCount > 0 ? totalLeadsCount : 1; // Prevent division by zero
+  const totalLeadCount = sources.reduce((sum, source) => (
+    sum + ((typeof source._count === 'number' ? source._count : source._count?.source) || 0)
+  ), 0);
+  const denominator = totalLeadCount || 1;
   
   const sourceData = sources.map(s => ({
     n: formatEnumLabel(s.source) || 'Direct',
@@ -425,13 +658,56 @@ function renderSourceSummary(sources) {
   `).join('');
 }
 
+function renderCounselorPerformance(counselors) {
+  const container = document.getElementById('dash-counselors');
+  if (!container) return;
+
+  if (!counselors || counselors.length === 0) {
+    container.innerHTML = renderEmptyCardState('No counselor activity available yet.');
+    return;
+  }
+
+  const topLeadCount = counselors[0]?.leadCount || 1;
+
+  container.innerHTML = counselors.map((counselor) => {
+    const percentage = Math.max(8, Math.round((counselor.leadCount / topLeadCount) * 100));
+    return `
+      <div class="mb-10">
+        <div class="flex-between text-xs mb-5"><span>${counselor.fullName}</span><span>${counselor.leadCount}</span></div>
+        <div class="report-bar-wrap"><div class="report-bar" style="width:${percentage}%; background:var(--secondary);"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTopStates(states) {
+  const container = document.getElementById('dash-countries');
+  if (!container) return;
+
+  if (!states || states.length === 0) {
+    container.innerHTML = renderEmptyCardState('No state preference data available yet.');
+    return;
+  }
+
+  const topStateCount = states[0]?.leadCount || 1;
+
+  container.innerHTML = states.map((state) => {
+    const percentage = Math.max(8, Math.round((state.leadCount / topStateCount) * 100));
+    return `
+      <div class="mb-10">
+        <div class="flex-between text-xs mb-5"><span>${state.name}</span><span>${state.leadCount}</span></div>
+        <div class="report-bar-wrap"><div class="report-bar" style="width:${percentage}%; background:var(--accent);"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
 /**
  * Fetch and Render Leads List
  */
-let LEADS_DATA = []; // Keeping the name for compatibility
 async function fetchLeads(params = {}) {
   try {
-    const query = new URLSearchParams(params).toString();
+    const query = new URLSearchParams({ limit: '100', ...params }).toString();
     const result = await apiRequest(`/leads?${query}`);
     LEADS_DATA = result.data.leads;
     
@@ -522,37 +798,41 @@ async function loadDistrictsForState(stateId, targetSelectId) {
    NAVIGATION & UI LOGIC
    ========================================= */
 
-let currentLeadView = 'table';
+function showPage(pageId, navElement, options = {}) {
+  const {
+    updateRoute = true,
+    replaceRoute = false
+  } = options;
 
-function showPage(pageId, navElement) {
   if (pageId === 'users' && (!CURRENT_USER || !['SUPER_ADMIN', 'ADMIN'].includes(CURRENT_USER.role))) {
     showToast('Unauthorized access', 'danger');
     return;
   }
 
-  // Update active nav item
-  if (navElement) {
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    navElement.classList.add('active');
+  const activeNavItem = navElement || document.querySelector(`.nav-item[data-page="${pageId}"]`);
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  if (activeNavItem) {
+    activeNavItem.classList.add('active');
   }
 
-  // Hide all pages
   document.querySelectorAll('.page-content').forEach(page => {
     page.classList.remove('active');
     page.style.display = 'none';
   });
 
-  // Show selected page
   const selectedPage = document.getElementById(pageId);
   if (selectedPage) {
     selectedPage.classList.add('active');
     selectedPage.style.display = 'flex';
   }
 
-  // Populate Selectors in Modals (if UI elements exist)
   populateModalSelectors();
+  closeMobileSidebar();
 
-  // Run page-specific logic
+  if (updateRoute) {
+    syncBrowserRoute(pageId, { replace: replaceRoute });
+  }
+
   switch(pageId) {
     case 'dashboard': populateDashboard(); break;
     case 'leads': populateLeads(); break;
@@ -570,19 +850,122 @@ function showPage(pageId, navElement) {
   }
 }
 
-function openModal(id) { 
+function openModal(id) {
   const modal = document.getElementById(id || 'leadModal');
-  if (modal) {
-    modal.style.display = '';
-    modal.classList.add('active');
+  if (!modal) {
+    return;
+  }
+
+  ACTIVE_MODAL_ID = modal.id;
+  modal.style.display = '';
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add(MODAL_OPEN_CLASS);
+
+  const dialog = modal.querySelector('.modal');
+  if (dialog) {
+    requestAnimationFrame(() => {
+      const focusTarget = dialog.querySelector('input, select, textarea, button');
+      if (focusTarget) {
+        focusTarget.focus();
+      }
+    });
   }
 }
-function closeModal(id) { 
+
+function closeModal(id) {
   const modal = document.getElementById(id || 'leadModal');
-  if (modal) {
-    modal.classList.remove('active');
-    modal.style.display = '';
+  if (!modal) {
+    return;
   }
+
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  ACTIVE_MODAL_ID = null;
+
+  if (!document.querySelector('.modal-overlay.active')) {
+    document.body.classList.remove(MODAL_OPEN_CLASS);
+  }
+}
+
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay.active').forEach((modal) => {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  });
+  ACTIVE_MODAL_ID = null;
+  document.body.classList.remove(MODAL_OPEN_CLASS);
+}
+
+function resetLeadForm() {
+  const form = document.getElementById('lead-form');
+  if (form) {
+    form.reset();
+  }
+
+  const districtSelect = document.getElementById('lead-district');
+  if (districtSelect) {
+    districtSelect.innerHTML = '<option value="">-- Select District --</option>';
+  }
+
+  populateFormDropdowns();
+}
+
+function discardLeadForm() {
+  resetLeadForm();
+  closeModal('leadModal');
+}
+
+function openMobileSidebar() {
+  document.getElementById('sidebar')?.classList.add('active');
+  document.body.classList.add(SIDEBAR_OPEN_CLASS);
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar')?.classList.remove('active');
+  document.body.classList.remove(SIDEBAR_OPEN_CLASS);
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const mainArea = document.getElementById('mainArea');
+  if (!sidebar || !mainArea || window.innerWidth <= 1024) {
+    return;
+  }
+
+  sidebar.classList.toggle('collapsed');
+  mainArea.classList.toggle('expanded');
+}
+
+function bindGlobalUiInteractions() {
+  document.addEventListener('click', (event) => {
+    const overlay = event.target.closest('.modal-overlay');
+    if (overlay && event.target === overlay) {
+      closeModal(overlay.id);
+      return;
+    }
+
+    if (
+      document.body.classList.contains(SIDEBAR_OPEN_CLASS) &&
+      !event.target.closest('#sidebar') &&
+      !event.target.closest('.mobile-menu-btn')
+    ) {
+      closeMobileSidebar();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      if (ACTIVE_MODAL_ID) {
+        closeModal(ACTIVE_MODAL_ID);
+        return;
+      }
+
+      if (document.body.classList.contains(SIDEBAR_OPEN_CLASS)) {
+        closeMobileSidebar();
+      }
+    }
+  });
 }
 
 function populateModalSelectors() {
@@ -664,58 +1047,8 @@ function toggleLeadView(view) {
    ========================================= */
 
 function populateDashboard() {
-  fetchDashboardData(); 
-  
-  // Populate Recent Leads Table
-  const tableBody = document.getElementById('recent-leads-body');
-  if (tableBody) {
-    if (!LEADS_DATA || LEADS_DATA.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-20 text-muted">No recent inquiry data to display yet.</td></tr>';
-    } else {
-      tableBody.innerHTML = LEADS_DATA.slice(0, 5).map(lead => {
-        const studentName = lead.studentName || 'Unknown Student';
-        const initials = studentName.split(' ').map(n=>n[0]).join('') || 'S';
-        const counsellor = lead.assignedCounsellor?.fullName || 'N/A';
-        const statusClass = getStatusBadgeClass(lead.status);
-        const statusLabel = lead.status ? lead.status.replace(/_/g, ' ') : 'PENDING';
-        const priorityClass = getPriorityBadgeClass(lead.priority);
-        
-        return `
-          <tr>
-            <td><div class="student-cell"><div class="avatar-sm" style="background:var(--primary)">${initials}</div><div><strong>${studentName}</strong><div class="text-xs text-muted">${lead.leadCode || 'CCRM-XXXX'}</div></div></div></td>
-            <td>${counsellor}</td>
-            <td>${lead.state?.name || 'N/A'}</td>
-            <td><span class="badge badge-blue" style="font-size:0.6rem">${lead.preferredCourse?.name || 'N/A'}</span></td>
-            <td><span class="badge ${statusClass}">${statusLabel}</span></td>
-            <td><span class="badge ${priorityClass}">${lead.priority || 'Medium'}</span></td>
-            <td><button class="text-primary font-600" onclick="renderProfile('${lead.id}')">View</button></td>
-          </tr>
-        `;
-      }).join('');
-    }
-  }
-
-  // Populate Reminders
-  const remindersList = document.getElementById('dash-reminders');
-  if (remindersList) {
-    const upcoming = LEADS_DATA ? LEADS_DATA.filter(l => l.nextCallDate && l.status !== 'ADMISSION_CONFIRMED' && l.status !== 'NOT_INTERESTED')
-      .sort((a,b) => new Date(a.nextCallDate) - new Date(b.nextCallDate))
-      .slice(0, 5) : [];
-
-    if (upcoming.length === 0) {
-      remindersList.innerHTML = '<div class="text-sm text-muted p-10">No pending follow-up reminders.</div>';
-    } else {
-      remindersList.innerHTML = upcoming.map(l => {
-        const dateStr = l.nextCallDate ? new Date(l.nextCallDate).toLocaleDateString() : 'N/A';
-        return `
-          <div class="reminder-item" style="border-left:3px solid var(--primary);">
-            <div class="rem-date">${dateStr}</div>
-            <div class="rem-text"><strong>Call ${l.studentName || 'Student'}</strong><div class="text-xs text-muted">${l.phone || 'No phone'}</div></div>
-          </div>
-        `;
-      }).join('');
-    }
-  }
+  renderDashboard();
+  fetchDashboardData();
 }
 
 function populateLeads() {
@@ -739,7 +1072,7 @@ function populateLeads() {
       
       return `
         <tr>
-          <td>
+          <td data-label="Lead">
             <div class="student-cell">
               <div class="avatar-sm" style="background:var(--primary)">${initials}</div>
               <div>
@@ -748,37 +1081,37 @@ function populateLeads() {
               </div>
             </div>
           </td>
-          <td>
+          <td data-label="Contact">
             <div class="text-sm">P: ${lead.phone || 'N/A'}</div>
             <div class="text-sm text-success">W: ${lead.whatsappNumber || lead.phone || 'N/A'}</div>
             <div class="text-xs text-muted">${lead.email || ''}</div>
           </td>
-          <td>
+          <td data-label="Location">
             <div class="text-sm"><strong>${lead.area || 'N/A'}</strong></div>
             <div class="text-xs text-muted">${lead.district?.name || 'N/A'}, ${lead.state?.name || 'N/A'}</div>
           </td>
-          <td>
+          <td data-label="Course">
             <div class="text-sm font-600">${lead.preferredCourse?.name || 'N/A'}</div>
             <div class="text-xs text-muted">${lead.college?.name || 'N/A'}</div>
           </td>
-          <td>
+          <td data-label="Source">
             <div class="text-sm">${lead.source || 'Direct'}</div>
             <div class="text-xs text-muted">Agt: ${lead.assignedCounsellor?.fullName || 'N/A'}</div>
           </td>
-          <td>
+          <td data-label="Call Tracking">
             <div class="call-tracking-cell">
               <div class="text-xs">Next: <strong>${nextCall}</strong></div>
               <div class="text-xs">Last: ${lastCall}</div>
               ${lead.notAttended ? '<span class="badge badge-danger" style="font-size:0.5rem; padding:1px 4px;">NOT ATTENDED</span>' : ''}
             </div>
           </td>
-          <td>
+          <td data-label="Status">
             <div class="flex-between" style="gap:8px;">
               <span class="badge ${getStatusBadgeClass(lead.status)}">${lead.status ? lead.status.replace(/_/g, ' ') : 'NEW'}</span>
               <button class="action-btn btn-sm" title="Change Status" onclick="openStatusModal('${lead.id}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
             </div>
           </td>
-           <td>
+           <td data-label="Actions">
             <div style="display:flex; gap:6px;">
               <button class="action-btn" title="Call" onclick="alert('Calling ${lead.phone || '...'}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
               <button class="action-btn" title="View Profile" onclick="renderProfile('${lead.id}')" style="background:var(--primary-soft); color:var(--primary);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
@@ -1160,7 +1493,11 @@ function populateKanban() {
   }).join('');
 }
 
-async function createNewLead() {
+async function createNewLead(event) {
+  if (event) {
+    event.preventDefault();
+  }
+
   const studentName = document.getElementById('lead-name').value;
   const phone = document.getElementById('lead-phone').value;
   
@@ -1181,6 +1518,10 @@ async function createNewLead() {
     preferredCourseId: document.getElementById('lead-course').value,
     collegeId: document.getElementById('lead-college').value,
     source: document.getElementById('lead-source').value,
+    assignedCounsellorId: document.getElementById('lead-counselor').value,
+    lastCallDate: document.getElementById('lead-last-call').value,
+    nextCallDate: document.getElementById('lead-next-call').value,
+    callAttempts: document.getElementById('lead-attempts').value,
     notes: document.getElementById('lead-notes').value,
     status: document.getElementById('lead-status').value || 'NEW_ENQUIRY'
   };
@@ -1193,6 +1534,7 @@ async function createNewLead() {
     });
     
     showToast('Lead created successfully!', 'success');
+    resetLeadForm();
     closeModal('leadModal');
     
     // Refresh data

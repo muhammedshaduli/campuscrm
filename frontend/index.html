@@ -64,7 +64,7 @@
           <span class="brand">Calviz CampusCRM</span>
           <span class="tagline">Admissions Management</span>
         </div>
-        <button class="mobile-close-btn" style="display:none; margin-left: auto; background:none; border:none; color:var(--text-main);" onclick="document.getElementById('sidebar').classList.remove('active')">
+        <button class="mobile-close-btn" style="display:none; margin-left: auto; background:none; border:none; color:var(--text-main);" onclick="closeMobileSidebar()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -72,80 +72,80 @@
       <div class="sidebar-nav">
         <div class="sidebar-section">Main</div>
         
-        <div class="nav-item active" onclick="showPage('dashboard', this)">
+        <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span class="nav-label">Dashboard</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('leads', this)">
+        <div class="nav-item" data-page="leads" onclick="showPage('leads', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span class="nav-label">Leads</span>
           <span class="nav-badge">48</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('students', this)">
+        <div class="nav-item" data-page="students" onclick="showPage('students', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
           <span class="nav-label">Students</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('applications', this)">
+        <div class="nav-item" data-page="applications" onclick="showPage('applications', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span class="nav-label">Applications</span>
           <span class="nav-badge">12</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('colleges', this)">
+        <div class="nav-item" data-page="colleges" onclick="showPage('colleges', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span class="nav-label">Colleges</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('courses', this)">
+        <div class="nav-item" data-page="courses" onclick="showPage('courses', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
           <span class="nav-label">Courses</span>
         </div>
 
         <div class="sidebar-section">Admissions Operations</div>
 
-        <div class="nav-item" onclick="showPage('admissions', this)">
+        <div class="nav-item" data-page="admissions" onclick="showPage('admissions', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
           <span class="nav-label">Admissions Board</span>
           <span class="nav-badge">7</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('documents', this)">
+        <div class="nav-item" data-page="documents" onclick="showPage('documents', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
           <span class="nav-label">Documents</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('kanban', this)">
+        <div class="nav-item" data-page="kanban" onclick="showPage('kanban', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           <span class="nav-label">Kanban Board</span>
         </div>
 
         <div class="sidebar-section">Finance & Admin</div>
 
-        <div class="nav-item" onclick="showPage('payments', this)">
+        <div class="nav-item" data-page="payments" onclick="showPage('payments', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span class="nav-label">Payments</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('invoices', this)">
+        <div class="nav-item" data-page="invoices" onclick="showPage('invoices', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span class="nav-label">Invoices</span>
           <span class="nav-badge" style="background:var(--danger); color:#fff;">3</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('reports', this)">
+        <div class="nav-item" data-page="reports" onclick="showPage('reports', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           <span class="nav-label">Reports</span>
         </div>
 
-        <div class="nav-item" id="nav-users" onclick="showPage('users', this)" style="display:none;">
+        <div class="nav-item" id="nav-users" data-page="users" onclick="showPage('users', this)" style="display:none;">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span class="nav-label">User Management</span>
         </div>
 
-        <div class="nav-item" onclick="showPage('settings', this)">
+        <div class="nav-item" data-page="settings" onclick="showPage('settings', this)">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <span class="nav-label">Settings</span>
         </div>
@@ -173,7 +173,7 @@
       <!-- HEADER -->
       <header class="header">
         <div class="header-left">
-          <button class="mobile-menu-btn" style="display:none;" onclick="document.getElementById('sidebar').classList.add('active')">
+          <button class="mobile-menu-btn" style="display:none;" onclick="openMobileSidebar()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
           <div class="header-title">Calviz <span>CampusCRM</span></div>
@@ -283,35 +283,8 @@
                 <div class="badge-blue badge">Real-time Data</div>
               </div>
               <div class="card-body">
-                <div class="pipeline-container">
-                  <div class="pipeline-stage">
-                    <div class="stage-bar" style="background: var(--navy);">312</div>
-                    <div class="stage-name">New Inquiry</div>
-                  </div>
-                  <div class="pipeline-stage">
-                    <div class="stage-bar" style="background: var(--primary);">218</div>
-                    <div class="stage-name">Counseling</div>
-                  </div>
-                  <div class="pipeline-stage">
-                    <div class="stage-bar" style="background: var(--secondary);">164</div>
-                    <div class="stage-name">Interested</div>
-                  </div>
-                  <div class="pipeline-stage">
-                    <div class="stage-bar" style="background: var(--info);">112</div>
-                    <div class="stage-name">Docs Pending</div>
-                  </div>
-                  <div class="pipeline-stage">
-                    <div class="stage-bar" style="background: var(--accent);">88</div>
-                    <div class="stage-name">Applied</div>
-                  </div>
-                  <div class="pipeline-stage">
-                    <div class="stage-bar" style="background: var(--success);">62</div>
-                    <div class="stage-name">Admission Confirmed</div>
-                  </div>
-                  <div class="pipeline-stage">
-                    <div class="stage-bar" style="background: var(--success);">142</div>
-                    <div class="stage-name">Enrolled</div>
-                  </div>
+                <div class="pipeline-container" id="dashboard-pipeline">
+                  <div class="text-sm text-muted">Loading pipeline health...</div>
                 </div>
               </div>
             </div>
@@ -977,36 +950,38 @@
        ============================= -->
        
   <!-- MODAL: NEW LEAD -->
-  <div class="modal-overlay" id="leadModal">
-    <div class="modal">
+  <div class="modal-overlay" id="leadModal" aria-hidden="true">
+    <div class="modal modal-lead" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title" tabindex="-1">
       <div class="modal-header">
-        <h3 class="modal-title">Create New Lead Enquiry</h3>
-        <button class="modal-close" onclick="closeModal('leadModal')">&times;</button>
+        <h3 class="modal-title" id="lead-modal-title">Create New Lead Enquiry</h3>
+        <button class="modal-close" type="button" aria-label="Close add lead modal" onclick="closeModal('leadModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Student Name *</label><input type="text" id="lead-name" class="form-input" placeholder="Full name"></div>
-          <div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" id="lead-phone" class="form-input" placeholder="+91 ..."></div>
-          <div class="form-group"><label class="form-label">WhatsApp Number</label><input type="tel" id="lead-whatsapp" class="form-input" placeholder="WhatsApp no."></div>
-          <div class="form-group"><label class="form-label">Email Address</label><input type="email" id="lead-email" class="form-input" placeholder="email@example.com"></div>
-          <div class="form-group"><label class="form-label">DOB</label><input type="date" id="lead-dob" class="form-input"></div>
-          <div class="form-group"><label class="form-label">Area / Landmark</label><input type="text" id="lead-area" class="form-input" placeholder="e.g. MG Road, Near Civil Station"></div>
-          <div class="form-group"><label class="form-label">District</label><select id="lead-district" class="form-select"><option>Ernakulam</option><option>Kozhikode</option><option>Thrissur</option><option>Malappuram</option><option>Kollam</option><option>Kottayam</option><option>Palakkad</option><option>Kannur</option><option>Alappuzha</option><option>Trivandrum</option></select></div>
-          <div class="form-group"><label class="form-label">State</label><select id="lead-state" class="form-select"><option>Kerala</option><option>Tamil Nadu</option><option>Karnataka</option></select></div>
-          <div class="form-group"><label class="form-label">Preferred Course</label><select id="lead-course" class="form-select"></select></div>
-          <div class="form-group"><label class="form-label">College Preference</label><select id="lead-college" class="form-select"></select></div>
-          <div class="form-group"><label class="form-label">Source</label><select id="lead-source" class="form-select"></select></div>
-          <div class="form-group"><label class="form-label">Assigned Counselor</label><select id="lead-counselor" class="form-select"></select></div>
-          <div class="form-group"><label class="form-label">Lead Status</label><select id="lead-status" class="form-select"></select></div>
-          <div class="form-group"><label class="form-label">Last Call Date</label><input type="date" id="lead-last-call" class="form-input"></div>
-          <div class="form-group"><label class="form-label">Next Call Date</label><input type="date" id="lead-next-call" class="form-input"></div>
-          <div class="form-group"><label class="form-label">Call Attempts</label><input type="number" id="lead-attempts" class="form-input" value="0"></div>
-          <div class="form-group full"><label class="form-label">Internal Follow-up Notes</label><textarea id="lead-notes" class="form-textarea" placeholder="Enter follow-up details..."></textarea></div>
-        </div>
+        <form id="lead-form" class="modal-form" onsubmit="createNewLead(event)">
+          <div class="form-grid form-grid-lead">
+            <div class="form-group"><label class="form-label">Student Name *</label><input type="text" id="lead-name" class="form-input" placeholder="Full name" autocomplete="name"></div>
+            <div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" id="lead-phone" class="form-input" placeholder="+91 ..." autocomplete="tel"></div>
+            <div class="form-group"><label class="form-label">WhatsApp Number</label><input type="tel" id="lead-whatsapp" class="form-input" placeholder="WhatsApp no." autocomplete="tel-national"></div>
+            <div class="form-group"><label class="form-label">Email Address</label><input type="email" id="lead-email" class="form-input" placeholder="email@example.com" autocomplete="email"></div>
+            <div class="form-group"><label class="form-label">DOB</label><input type="date" id="lead-dob" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Area / Landmark</label><input type="text" id="lead-area" class="form-input" placeholder="e.g. MG Road, Near Civil Station"></div>
+            <div class="form-group"><label class="form-label">State</label><select id="lead-state" class="form-select"><option value="">-- Select State --</option></select></div>
+            <div class="form-group"><label class="form-label">District</label><select id="lead-district" class="form-select"><option value="">-- Select District --</option></select></div>
+            <div class="form-group"><label class="form-label">Preferred Course</label><select id="lead-course" class="form-select"></select></div>
+            <div class="form-group"><label class="form-label">College Preference</label><select id="lead-college" class="form-select"></select></div>
+            <div class="form-group"><label class="form-label">Source</label><select id="lead-source" class="form-select"></select></div>
+            <div class="form-group"><label class="form-label">Assigned Counselor</label><select id="lead-counselor" class="form-select"></select></div>
+            <div class="form-group"><label class="form-label">Lead Status</label><select id="lead-status" class="form-select"></select></div>
+            <div class="form-group"><label class="form-label">Call Attempts</label><input type="number" id="lead-attempts" class="form-input" value="0" min="0"></div>
+            <div class="form-group"><label class="form-label">Last Call Date</label><input type="date" id="lead-last-call" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Next Call Date</label><input type="date" id="lead-next-call" class="form-input"></div>
+            <div class="form-group full"><label class="form-label">Internal Follow-up Notes</label><textarea id="lead-notes" class="form-textarea" placeholder="Enter follow-up details..."></textarea></div>
+          </div>
+        </form>
       </div>
       <div class="modal-footer">
-        <button class="badge badge-red" style="padding:10px 20px;" onclick="closeModal('leadModal')">Discard</button>
-        <button class="btn-primary" id="btn-create-lead" onclick="createNewLead()">Create Lead</button>
+        <button class="badge badge-red" type="button" style="padding:10px 20px;" onclick="discardLeadForm()">Discard</button>
+        <button class="btn-primary" id="btn-create-lead" type="submit" form="lead-form">Create Lead</button>
       </div>
     </div>
   </div>

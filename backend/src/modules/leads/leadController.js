@@ -11,7 +11,8 @@ const createLead = asyncHandler(async (req, res, next) => {
   const {
     studentName, phone, whatsappNumber, dob, email, area,
     districtId, stateId, preferredCourseId, collegeId,
-    source, assignedCounsellorId, status, notes
+    source, assignedCounsellorId, status, notes,
+    lastCallDate, nextCallDate, callAttempts
   } = req.body;
 
   // Generate unique lead code
@@ -35,6 +36,9 @@ const createLead = asyncHandler(async (req, res, next) => {
       source,
       assignedCounsellorId: resolvedCounsellorId,
       status: status || 'NEW_ENQUIRY',
+      lastCallDate: lastCallDate ? new Date(lastCallDate) : null,
+      nextCallDate: nextCallDate ? new Date(nextCallDate) : null,
+      callAttempts: Number.isFinite(Number(callAttempts)) ? Number(callAttempts) : 0,
       notes,
       createdBy: req.user.id,
     },
@@ -58,6 +62,19 @@ const createLead = asyncHandler(async (req, res, next) => {
       userId: req.user.id
     }
   });
+
+  if (lead.nextCallDate && resolvedCounsellorId) {
+    await prisma.reminder.create({
+      data: {
+        leadId: lead.id,
+        assignedTo: resolvedCounsellorId,
+        title: `Initial follow-up: ${lead.studentName}`,
+        description: notes || 'Follow up on newly created lead enquiry.',
+        dueDate: lead.nextCallDate,
+        priority: 'MEDIUM',
+      },
+    });
+  }
 
   sendResponse(res, 201, 'Lead created successfully', lead);
 });
