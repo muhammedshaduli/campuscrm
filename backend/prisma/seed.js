@@ -187,12 +187,7 @@ async function main() {
     seededUsers.push(user);
   }
 
-  console.log('Default users are ready:');
-  defaultUsers.forEach((user) => {
-    console.log(`- ${user.role}: ${user.email} / ${user.password}`);
-  });
-
-  console.log('Calviz CampusCRM seed completed successfully.');
+  console.log(`Calviz CampusCRM seed completed successfully for ${seededUsers.length} default users.`);
 }
 
 main()

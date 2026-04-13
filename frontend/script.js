@@ -29,7 +29,7 @@ const resolveApiBaseUrl = () => {
     ['', 'localhost', '127.0.0.1'].includes(window.location.hostname);
 
   return isLocal
-    ? 'http://localhost:5000/api'
+    ? 'http://127.0.0.1:5000/api'
     : 'https://api-campuscrm.nextgenvarietex.com/api';
 };
 
