@@ -110,19 +110,30 @@ const refresh = asyncHandler(async (req, res, next) => {
 
   const { accessToken, refreshToken: newRefreshToken } = generateTokens(storedToken.user);
 
-  // Rotate refresh token
-  await prisma.refreshToken.delete({ where: { id: storedToken.id } });
-  await prisma.refreshToken.create({
-    data: {
-      token: newRefreshToken,
-      userId: storedToken.user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
+  const rotationResult = await prisma.$transaction(async (tx) => {
+    const deletedToken = await tx.refreshToken.deleteMany({
+      where: {
+        id: storedToken.id,
+        token: refreshToken,
+      },
+    });
+
+    if (deletedToken.count === 0) {
+      throw new ApiError(401, 'Refresh token has already been rotated or revoked');
+    }
+
+    return tx.refreshToken.create({
+      data: {
+        token: newRefreshToken,
+        userId: storedToken.user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
   });
 
   sendResponse(res, 200, 'Token refreshed successfully', {
     accessToken,
-    refreshToken: newRefreshToken,
+    refreshToken: rotationResult.token,
   });
 });
 
